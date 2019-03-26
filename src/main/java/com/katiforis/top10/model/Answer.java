@@ -67,12 +67,4 @@ public class Answer implements Serializable {
     public void setDisplayDescription(String displayDescription) {
         this.displayDescription = displayDescription;
     }
-//
-//    public Boolean getIdentical() {
-//        return identical;
-//    }
-//
-//    public void setIdentical(Boolean identical) {
-//        this.identical = identical;
-//    }
 }
