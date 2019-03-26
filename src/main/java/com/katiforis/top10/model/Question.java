@@ -13,7 +13,6 @@ public class Question implements Serializable, Comparable<Question>{
     @Column(name = "id")
     private long id;
 
-    @Basic
     @Column(name = "description")
     private String description;
 

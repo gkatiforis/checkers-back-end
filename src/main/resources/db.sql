@@ -5,26 +5,30 @@ SET CHARSET 'utf8';
 
 DROP TABLE IF EXISTS question_difficulty;
 DROP TABLE IF EXISTS answer;
+DROP TABLE IF EXISTS friendship;
+DROP TABLE IF EXISTS friend_invitation;
+DROP TABLE IF EXISTS game_invitation;
+DROP TABLE IF EXISTS game_invitation_status;
+DROP TABLE IF EXISTS share_invitation;
 DROP TABLE IF EXISTS player;
 
 CREATE TABLE question_difficulty (
   id BIGINT PRIMARY KEY auto_increment,
-  description VARCHAR(80)
+  description VARCHAR(80) NOT NULL
 );
 
 CREATE TABLE question (
   id BIGINT PRIMARY KEY auto_increment,
-  description VARCHAR(500),
-  question_difficulty_id BIGINT,
+  description VARCHAR(500) NOT NULL,
+  question_difficulty_id BIGINT NOT NULL,
   FOREIGN KEY (question_difficulty_id) REFERENCES question_difficulty(id)
 );
 
 CREATE TABLE answer (
   id BIGINT PRIMARY KEY auto_increment,
-  question_id BIGINT,
+  question_id BIGINT NOT NULL,
   description VARCHAR(200),
   display_description VARCHAR(200),
-#   identical BOOLEAN DEFAULT  FALSE,
   points INT,
   FOREIGN KEY (question_id) REFERENCES question(id)
 );
@@ -34,8 +38,51 @@ ALTER TABLE question CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE player (
   id BIGINT PRIMARY KEY auto_increment,
-  player_id VARCHAR(200),
-  username VARCHAR(200)
+  player_id VARCHAR(200) NOT NULL UNIQUE,
+  username VARCHAR(200) NOT NULL UNIQUE,
+  elo INT NOT NULL,
+  level INT NOT NULL,
+  level_points INT NOT NULL,
+  bonus_points INT NOT NULL
+);
+
+CREATE TABLE friend_invitation (
+  id BIGINT PRIMARY KEY auto_increment,
+  from_player_id BIGINT NOT NULL,
+  to_player_id BIGINT NOT NULL,
+  request_date DATETIME NOT NULL,
+  UNIQUE KEY friend_invitation_players (from_player_id, to_player_id)
+);
+
+CREATE TABLE game_invitation (
+  id BIGINT PRIMARY KEY auto_increment,
+  from_player_id BIGINT NOT NULL,
+  to_player_id BIGINT NOT NULL,
+  status_id INT NOT NULL,
+  is_private BOOLEAN NOT NULL,
+  request_date DATETIME NOT NULL,
+  UNIQUE KEY game_invitation_players (from_player_id, to_player_id)
+);
+
+CREATE TABLE game_invitation_status (
+  id INT PRIMARY KEY NOT NULL,
+  description VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE share_invitation (
+  id BIGINT PRIMARY KEY auto_increment,
+  from_player_id BIGINT NOT NULL,
+  to_player_id BIGINT NOT NULL,
+  code VARCHAR(100) NOT NULL,
+  request_date DATETIME NOT NULL,
+  UNIQUE KEY game_invitation_players (from_player_id, to_player_id)
+);
+
+CREATE TABLE friendship(
+  id BIGINT PRIMARY KEY auto_increment,
+  player_id1 BIGINT NOT NULL,
+  player_id2 BIGINT NOT NULL,
+  UNIQUE KEY friendship_player (player_id1, player_id2)
 );
 
 -- Populate data

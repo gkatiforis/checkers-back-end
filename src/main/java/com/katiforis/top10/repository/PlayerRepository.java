@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PlayerRepository extends CrudRepository<Player, Long> {
+    Player findById(Long i);
     Player findByPlayerId(String id);
     Player save(Player player);
 }

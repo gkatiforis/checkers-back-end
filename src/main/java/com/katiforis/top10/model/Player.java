@@ -2,6 +2,8 @@ package com.katiforis.top10.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name= "player")
@@ -17,6 +19,33 @@ public class Player implements Serializable {
 
     @Column(name = "username")
     private String username;
+
+    @Column(name = "elo")
+    private Integer elo;
+
+    @Column(name = "level")
+    private Integer level;
+
+    @Column(name = "level_points")
+    private Integer levelPoints;
+
+    @Column(name = "bonus_points")
+    private Integer bonusPoints;
+
+    @OneToMany(mappedBy = "from", fetch = FetchType.LAZY)
+    private List<FriendInvitation> myFriendInvitations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "to", fetch = FetchType.LAZY)
+    private List<FriendInvitation> friendInvitations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "from", fetch = FetchType.LAZY)
+    private List<GameInvitation> myGameInvitations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "to", fetch = FetchType.LAZY)
+    private List<GameInvitation> gameInvitations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "from", fetch = FetchType.LAZY)
+    private List<ShareInvitation> shareInvitations = new ArrayList<>();
 
     public Player() {
     }
@@ -52,6 +81,78 @@ public class Player implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Integer getElo() {
+        return elo;
+    }
+
+    public void setElo(Integer elo) {
+        this.elo = elo;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public Integer getLevelPoints() {
+        return levelPoints;
+    }
+
+    public void setLevelPoints(Integer levelPoints) {
+        this.levelPoints = levelPoints;
+    }
+
+    public Integer getBonusPoints() {
+        return bonusPoints;
+    }
+
+    public void setBonusPoints(Integer bonusPoints) {
+        this.bonusPoints = bonusPoints;
+    }
+
+    public List<FriendInvitation> getMyFriendInvitations() {
+        return myFriendInvitations;
+    }
+
+    public void setMyFriendInvitations(List<FriendInvitation> myFriendInvitations) {
+        this.myFriendInvitations = myFriendInvitations;
+    }
+
+    public List<FriendInvitation> getFriendInvitations() {
+        return friendInvitations;
+    }
+
+    public void setFriendInvitations(List<FriendInvitation> friendInvitations) {
+        this.friendInvitations = friendInvitations;
+    }
+
+    public List<GameInvitation> getMyGameInvitations() {
+        return myGameInvitations;
+    }
+
+    public void setMyGameInvitations(List<GameInvitation> myGameInvitations) {
+        this.myGameInvitations = myGameInvitations;
+    }
+
+    public List<GameInvitation> getGameInvitations() {
+        return gameInvitations;
+    }
+
+    public void setGameInvitations(List<GameInvitation> gameInvitations) {
+        this.gameInvitations = gameInvitations;
+    }
+
+    public List<ShareInvitation> getShareInvitations() {
+        return shareInvitations;
+    }
+
+    public void setShareInvitations(List<ShareInvitation> shareInvitations) {
+        this.shareInvitations = shareInvitations;
     }
 
     @Override
