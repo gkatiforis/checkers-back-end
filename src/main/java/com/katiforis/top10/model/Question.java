@@ -1,9 +1,16 @@
 package com.katiforis.top10.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
 @Entity
 @Table(name= "question")
 public class Question implements Serializable, Comparable<Question>{
@@ -27,74 +34,6 @@ public class Question implements Serializable, Comparable<Question>{
         this.description = description;
         this.questionDifficulty = questionDifficulty;
         this.answers = answers;
-    }
-
-    public Question() {
-    }
-
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public QuestionDifficulty getQuestionDifficulty() {
-        return questionDifficulty;
-    }
-
-    public void setQuestionDifficulty(QuestionDifficulty questionDifficulty) {
-        this.questionDifficulty = questionDifficulty;
-    }
-
-    public List<Answer> getAnswers() {
-        return answers;
-    }
-
-    public void setAnswers(List<Answer> answers) {
-        this.answers = answers;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Question question = (Question) o;
-
-        if (id != question.id) return false;
-        if (!description.equals(question.description)) return false;
-        if (!questionDifficulty.equals(question.questionDifficulty)) return false;
-        return answers.equals(question.answers);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + description.hashCode();
-        result = 31 * result + questionDifficulty.hashCode();
-        result = 31 * result + answers.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Question{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                ", questionDifficulty=" + questionDifficulty +
-                ", answers=" + answers +
-                '}';
     }
 
     @Override

@@ -24,7 +24,6 @@
 		<java.version>1.8</java.version>
 	</properties>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -36,11 +35,6 @@
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
@@ -61,46 +55,19 @@
 		<dependency>
 			<groupId>org.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
+			<!--TODO remove version-->
 			<version>3.6.2</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.ehcache/ehcache-clustered -->
-		<!--<dependency>-->
-			<!--<groupId>org.ehcache</groupId>-->
-			<!--<artifactId>ehcache-clustered</artifactId>-->
-			<!--<version>3.6.2</version>-->
-		<!--</dependency>-->
-
-		<!--&lt;!&ndash; https://mvnrepository.com/artifact/org.ehcache.modules/ehcache-impl &ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>org.ehcache</groupId>-->
-			<!--<artifactId>ehcache-transactions</artifactId>-->
-			<!--<version>3.6.2</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>javax.cache</groupId>-->
-			<!--<artifactId>cache-api</artifactId>-->
-			<!--&lt;!&ndash;<version>1.0.0</version>&ndash;&gt;-->
-		<!--</dependency>-->
-		<!--&lt;!&ndash; ehcache and JSR dependencies&ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>org.ehcache</groupId>-->
-			<!--<artifactId>ehcache</artifactId>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>javax.cache</groupId>-->
-			<!--<artifactId>cache-api</artifactId>-->
-		<!--</dependency>-->
-
-		<!--&lt;!&ndash; https://mvnrepository.com/artifact/net.sf.ehcache/ehcache-explicitlocking &ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>net.sf.ehcache</groupId>-->
-			<!--<artifactId>ehcache-explicitlocking</artifactId>-->
-			<!--<version>0.2</version>-->
-		<!--</dependency>-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
         <dependency>
@@ -108,7 +75,6 @@
 			<artifactId>modelmapper</artifactId>
 			<version>0.7.4</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -119,6 +85,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
 </project>

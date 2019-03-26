@@ -1,9 +1,16 @@
 package com.katiforis.top10.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
 @Entity
 @Table(name= "share_invitation")
 public class ShareInvitation implements Serializable {
@@ -25,48 +32,4 @@ public class ShareInvitation implements Serializable {
 
     @Column(name = "request_date")
     private Date requestDate;
-
-
-    public ShareInvitation() {
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Player getFrom() {
-        return from;
-    }
-
-    public void setFrom(Player from) {
-        this.from = from;
-    }
-
-    public Player getTo() {
-        return to;
-    }
-
-    public void setTo(Player to) {
-        this.to = to;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public Date getRequestDate() {
-        return requestDate;
-    }
-
-    public void setRequestDate(Date requestDate) {
-        this.requestDate = requestDate;
-    }
 }

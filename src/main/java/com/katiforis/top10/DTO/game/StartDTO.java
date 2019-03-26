@@ -1,10 +1,13 @@
 package com.katiforis.top10.DTO.game;
 
 import com.katiforis.top10.util.GameResponseState;
+import lombok.*;
 
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
 public class StartDTO extends GameDTO {
-
-
     private String gameId;
 
     public StartDTO() {
@@ -13,14 +16,6 @@ public class StartDTO extends GameDTO {
 
     public StartDTO(String gameId) {
         super(GameResponseState.START.getState());
-        this.gameId = gameId;
-    }
-
-    public String getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(String gameId) {
         this.gameId = gameId;
     }
 }

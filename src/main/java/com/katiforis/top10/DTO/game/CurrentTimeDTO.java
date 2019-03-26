@@ -1,21 +1,15 @@
 package com.katiforis.top10.DTO.game;
 
+import lombok.*;
+
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class CurrentTimeDTO implements Serializable {
-
     private Date currentDate;
-
-    public CurrentTimeDTO() {
-    }
-
-    public Date getCurrentDate() {
-        return currentDate;
-    }
-
-    public void setCurrentDate(Date currentDate) {
-        this.currentDate = currentDate;
-    }
 }

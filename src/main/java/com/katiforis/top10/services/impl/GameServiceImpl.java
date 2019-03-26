@@ -72,6 +72,7 @@ public class GameServiceImpl implements GameService {
 				Player player2  = player;
 
 				ModelMapper modelMapper = new ModelMapper();
+				modelMapper.getConfiguration().setAmbiguityIgnored(true);
 				GamePlayerDTO gamePlayerDTO = 	modelMapper.map(player1, GamePlayerDTO.class);
 				GamePlayerDTO gamePlayerDTO2 = 	modelMapper.map(player2, GamePlayerDTO.class);
 				List<GamePlayerDTO> players = new ArrayList<>();
@@ -131,7 +132,7 @@ public class GameServiceImpl implements GameService {
 					answerDTO.setDescription(descriptionArray[0]);
 				}
 				activeGameAnswerDTO.setAnswer(answerDTO);
-				activeGameAnswerDTO.setCorrect(true);
+				activeGameAnswerDTO.setIsCorrect(true);
 
 			}else{
 				if(correctAnswer.getDisplayDescription() == null){
@@ -140,11 +141,11 @@ public class GameServiceImpl implements GameService {
 				}
 				activeGameAnswerDTO.setAnswer(answerDTO);
 				activeGameAnswerDTO.setHasAlreadyBeenSaid(true);
-				activeGameAnswerDTO.setCorrect(false);
+				activeGameAnswerDTO.setIsCorrect(false);
 			}
 		}else{
 			activeGameAnswerDTO.setAnswer(new AnswerDTO(playerAnswerDTO.getAnswer()));
-			activeGameAnswerDTO.setCorrect(false);
+			activeGameAnswerDTO.setIsCorrect(false);
 			activeGameAnswerDTO.setHasAlreadyBeenSaid(false);
 			gameCache.addAnswer(playerAnswerDTO, activeGameAnswerDTO);
 		}

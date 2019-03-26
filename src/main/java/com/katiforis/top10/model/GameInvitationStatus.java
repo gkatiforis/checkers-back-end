@@ -1,8 +1,15 @@
-package com.katiforis.top10.model;//package com.katiforis.top10.model;
+package com.katiforis.top10.model;
+
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
 @Entity
 @Table(name= "game_invitation_status")
 public class GameInvitationStatus implements Serializable {
@@ -13,23 +20,4 @@ public class GameInvitationStatus implements Serializable {
 
     @Column(name = "description")
     private String description;
-
-    public GameInvitationStatus() {
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }
