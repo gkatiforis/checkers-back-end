@@ -138,12 +138,13 @@ values
   (3, 'Python', 2),
   (3, 'Swift', 3),
   (3, 'Kotlin', 3),
-  (3, 'Scala', 3),
+  (3, 'Scala', 3);
 
-(5, 'Scrabble|σκράμπλ', 1),
-(5, 'Monopoly|μονόπολη', 1),
-(5, 'Dixit|ντίξιτ', 1),
-(5, 'Tichu|τίτσου', 4);
+insert into answer(question_id, description, display_description, points)values
+(5, 'Scrabble|σκράμπλ', 'Scrabble', 1),
+(5, 'Monopoly|μονόπολη','Monopoly', 1),
+(5, 'Dixit|ντίξιτ', 'Dixit', 1),
+(5, 'Tichu|τίτσου','Tichu', 4);
 
 insert into answer(question_id, description, display_description,  points)
 values

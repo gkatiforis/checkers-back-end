@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -14,7 +13,6 @@ import java.util.Set;
 public class GameStateDTO extends GameDTO {
     private List<GamePlayerDTO> players;
     private List<QuestionDTO> questions;
-    private Set<ActiveGameAnswerDTO> currentAnswers;
     private Date dateStarted;
     private Date currentDate;
 

@@ -12,6 +12,7 @@ import java.io.Serializable;
 @ToString
 public class AnswerDTO implements Serializable {
     private long id;
+    private String displayDescription;
     private String description;
     private Integer points;
     @JsonIgnore

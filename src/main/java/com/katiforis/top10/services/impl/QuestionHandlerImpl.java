@@ -52,7 +52,7 @@ public class QuestionHandlerImpl implements QuestionHandler {
 	@Override
 	public Answer isAnswerValid(PlayerAnswerDTO playerAnswerDTO) {
 
-		String[] answers = WordHandler.convert(playerAnswerDTO.getAnswer()).split("\\|");
+		String[] answers = WordHandler.convert(playerAnswerDTO.getDescription()).split("\\|");
 
 
 		Question question = getQuestionById(playerAnswerDTO.getQuestionId());

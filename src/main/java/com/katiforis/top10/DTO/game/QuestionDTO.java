@@ -4,6 +4,7 @@ import com.katiforis.top10.model.QuestionDifficulty;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public class QuestionDTO implements Serializable {
     private String description;
     private QuestionDifficulty questionDifficulty;
     private List<AnswerDTO> answers;
+    private Set<PlayerAnswerDTO> currentAnswers = new HashSet<>();
 
     public QuestionDTO(String description, QuestionDifficulty questionDifficulty, List<AnswerDTO> answers) {
         this.description = description;

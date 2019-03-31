@@ -1,7 +1,7 @@
 package com.katiforis.top10.services;
 
-import com.katiforis.top10.DTO.game.FindGameDTO;
 import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
+import com.katiforis.top10.DTO.game.FindGameDTO;
 
 public interface GameService {
 

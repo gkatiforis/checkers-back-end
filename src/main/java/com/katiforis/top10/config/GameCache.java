@@ -1,38 +1,41 @@
 package com.katiforis.top10.config;
 
-import com.katiforis.top10.DTO.game.ActiveGameAnswerDTO;
-import com.katiforis.top10.DTO.game.GameStateDTO;
 import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
+import com.katiforis.top10.DTO.game.GameStateDTO;
+import com.katiforis.top10.DTO.game.QuestionDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
-
 @Component
 public class GameCache extends GenericCacheManager<String, GameStateDTO> {
 
-    public boolean addAnswer(PlayerAnswerDTO playerAnswerDTO, ActiveGameAnswerDTO activeGameAnswerDTO){
+    public boolean addAnswer(PlayerAnswerDTO playerAnswerDTO){
 
         synchronized (cache){
             GameStateDTO gameStateDTO =  getGameState(playerAnswerDTO.getGameId());
-            Set<ActiveGameAnswerDTO> activeGameAnswerDTOS = gameStateDTO.getCurrentAnswers();
 
-            if(activeGameAnswerDTOS == null){
-              activeGameAnswerDTOS = new HashSet<>();
+                QuestionDTO question = gameStateDTO.getQuestions()
+                    .stream().filter(questionDTO -> questionDTO.getId() == playerAnswerDTO.getQuestionId())
+                    .findFirst().get();
+
+          Set<PlayerAnswerDTO> playerAnswerDTOS =  question.getCurrentAnswers();
+            if(playerAnswerDTOS == null){
+              playerAnswerDTOS = new HashSet<>();
             }
 
             gameStateDTO.getPlayers()
                     .stream()
                     .filter(player -> player.getPlayerId().equals(playerAnswerDTO.getUserId()))
                     .forEach(player -> {
-                        player.setPoints(player.getPoints() + activeGameAnswerDTO.getAnswer().getPoints());
-                        activeGameAnswerDTO.setPlayer(player);
+                        player.setPoints(player.getPoints() + playerAnswerDTO.getPoints());
+                        playerAnswerDTO.setPlayer(player);
                     });
 
-            boolean isDuplicateAnswer = !activeGameAnswerDTOS.add(activeGameAnswerDTO);
+            boolean isDuplicateAnswer = !playerAnswerDTOS.add(playerAnswerDTO);
 
             if(!isDuplicateAnswer){
-                gameStateDTO.setCurrentAnswers(activeGameAnswerDTOS);
+                question.setCurrentAnswers(playerAnswerDTOS);
                 this.saveItem(playerAnswerDTO.getGameId(), gameStateDTO);
             }
 

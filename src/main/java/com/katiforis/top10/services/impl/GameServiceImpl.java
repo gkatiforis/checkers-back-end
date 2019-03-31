@@ -114,43 +114,46 @@ public class GameServiceImpl implements GameService {
 
 		Answer correctAnswer = questionHandler.isAnswerValid(playerAnswerDTO);
 
-		ActiveGameAnswerDTO activeGameAnswerDTO = new ActiveGameAnswerDTO();
-
 		if(correctAnswer != null){
 			AnswerDTO answerDTO = 	modelMapper.map(correctAnswer, AnswerDTO.class);
-			activeGameAnswerDTO.setAnswer(answerDTO);
 
-			QuestionDTO questionDTO = 	modelMapper.map(correctAnswer.getQuestion(), QuestionDTO.class);
-			activeGameAnswerDTO.setQuestion(questionDTO);
+			if(answerDTO.getDisplayDescription() == null || answerDTO.getDisplayDescription().isEmpty()){
+				playerAnswerDTO.setDescription(answerDTO.getDescription());
+			}else {
+				playerAnswerDTO.setDescription(answerDTO.getDisplayDescription());
+			}
 
-			boolean isDuplicateAnswer = gameCache.addAnswer(playerAnswerDTO, activeGameAnswerDTO);
+			playerAnswerDTO.setPoints(answerDTO.getPoints());
+			boolean isDuplicateAnswer = gameCache.addAnswer(playerAnswerDTO);
 
 			if(!isDuplicateAnswer){
 
 				if(correctAnswer.getDisplayDescription() == null){
 					String[] descriptionArray = correctAnswer.getDescription().split("\\|");
-					answerDTO.setDescription(descriptionArray[0]);
+					answerDTO.setDisplayDescription(descriptionArray[0]);
 				}
-				activeGameAnswerDTO.setAnswer(answerDTO);
-				activeGameAnswerDTO.setIsCorrect(true);
+			//	playerAnswerDTO.setAnswer(answerDTO);
+				playerAnswerDTO.setPoints(answerDTO.getPoints());
+				playerAnswerDTO.setCorrect(true);
 
 			}else{
 				if(correctAnswer.getDisplayDescription() == null){
 					String[] descriptionArray = correctAnswer.getDescription().split("\\|");
-					answerDTO.setDescription(descriptionArray[0]);
+					answerDTO.setDisplayDescription(descriptionArray[0]);
 				}
-				activeGameAnswerDTO.setAnswer(answerDTO);
-				activeGameAnswerDTO.setHasAlreadyBeenSaid(true);
-				activeGameAnswerDTO.setIsCorrect(false);
+
+				playerAnswerDTO.setPoints(0);
+				playerAnswerDTO.setHasAlreadyBeenSaid(true);
+				playerAnswerDTO.setCorrect(false);
 			}
 		}else{
-			activeGameAnswerDTO.setAnswer(new AnswerDTO(playerAnswerDTO.getAnswer()));
-			activeGameAnswerDTO.setIsCorrect(false);
-			activeGameAnswerDTO.setHasAlreadyBeenSaid(false);
-			gameCache.addAnswer(playerAnswerDTO, activeGameAnswerDTO);
+			playerAnswerDTO.setPoints(0);
+			playerAnswerDTO.setCorrect(false);
+			playerAnswerDTO.setHasAlreadyBeenSaid(false);
+			gameCache.addAnswer(playerAnswerDTO);
 		}
 
-		ResponseEntity<GameDTO> response = new ResponseEntity<>(activeGameAnswerDTO, HttpStatus.OK);
+		ResponseEntity<GameDTO> response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSend("/g/" + gameStateDTO.getGameId(), response);
 		logger.debug("Start PlayerController.login");
 
@@ -167,9 +170,8 @@ public class GameServiceImpl implements GameService {
 
 			gameStateDTO.setQuestions(questionDTO);
 			gameStateDTO.setPlayers(players);
-			gameStateDTO.setCurrentAnswers(new HashSet<>());
 
-			Date now = Calendar.getInstance().getTime();
+			Date now = new Date();
 			gameStateDTO.setCurrentDate(now);
 			gameStateDTO.setDateStarted(now);
 
@@ -199,7 +201,7 @@ public class GameServiceImpl implements GameService {
 		userId = userId.replace("\n", "").replace("\r", "");
 
 		GameStateDTO gameStateDTO = gameCache.getGameState(gameId);
-		Date now = Calendar.getInstance().getTime();
+		Date now = new Date();
 		gameStateDTO.setCurrentDate(now);
 
 		ResponseEntity<GameDTO> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
