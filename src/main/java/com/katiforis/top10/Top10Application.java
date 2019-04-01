@@ -11,4 +11,3 @@ public class Top10Application  {
 		SpringApplication.run(Top10Application.class, args);
 	}
 }
-

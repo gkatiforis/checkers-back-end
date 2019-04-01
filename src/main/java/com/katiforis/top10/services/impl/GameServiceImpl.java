@@ -57,7 +57,7 @@ public class GameServiceImpl implements GameService {
 			return;
 		}
 
-		GameStateDTO gameStateDTO = gameCache.getGameState(findGameDTO.getGameId());
+		GameStateDTO gameStateDTO = gameCache.getGame(findGameDTO.getGameId());
 
 		if(gameStateDTO != null){
 			StartDTO startDTO = new StartDTO();
@@ -106,7 +106,7 @@ public class GameServiceImpl implements GameService {
 		logger.debug("Start PlayerController.login");
 		ModelMapper modelMapper = new ModelMapper();
 
-		GameStateDTO gameStateDTO = gameCache.getGameState(playerAnswerDTO.getGameId());
+		GameStateDTO gameStateDTO = gameCache.getGame(playerAnswerDTO.getGameId());
 
 		if(gameStateDTO == null){
 			return;
@@ -175,7 +175,7 @@ public class GameServiceImpl implements GameService {
 			gameStateDTO.setCurrentDate(now);
 			gameStateDTO.setDateStarted(now);
 
-			gameCache.addGameState(gameStateDTO);
+			gameCache.addGame(gameStateDTO);
 
 
 			Runnable endGame  = () -> endGame(gameStateDTO.getGameId());
@@ -200,7 +200,7 @@ public class GameServiceImpl implements GameService {
 		gameId = gameId.replace("\n", "").replace("\r", "");
 		userId = userId.replace("\n", "").replace("\r", "");
 
-		GameStateDTO gameStateDTO = gameCache.getGameState(gameId);
+		GameStateDTO gameStateDTO = gameCache.getGame(gameId);
 		Date now = new Date();
 		gameStateDTO.setCurrentDate(now);
 
@@ -217,7 +217,7 @@ public class GameServiceImpl implements GameService {
 		EndDTO endDTO = new EndDTO(gameId);
 		ResponseEntity<GameDTO> response = new ResponseEntity<>(endDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSend("/g/" + gameId, response);
-		gameCache.removeGameState(gameId);
+		gameCache.removeGame(gameId);
 
 		logger.debug("Start PlayerController.login");
 	}
