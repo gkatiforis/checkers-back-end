@@ -1,7 +1,6 @@
 package com.katiforis.top10.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -9,19 +8,19 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 import java.util.Map;
 
+@Slf4j
 public class HandshakeInterceptor extends HttpSessionHandshakeInterceptor {
-	private static Logger logger = LoggerFactory.getLogger("xlui");
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-		logger.info("HandshakeInterceptor: beforeHandshake");
-		logger.info("Attributes: " + attributes.toString());
+		log.info("HandshakeInterceptor: beforeHandshake");
+		log.info("Attributes: " + attributes.toString());
 		return super.beforeHandshake(request, response, wsHandler, attributes);
 	}
 
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception ex) {
-		logger.info("HandshakeInterceptor: afterHandshake");
+		log.info("HandshakeInterceptor: afterHandshake");
 		super.afterHandshake(request, response, wsHandler, ex);
 	}
 }

@@ -2,15 +2,14 @@ package com.katiforis.top10.services.impl;
 
 import com.katiforis.top10.DTO.game.*;
 
-import com.katiforis.top10.config.GameCache;
+import com.katiforis.top10.cache.GameCache;
 import com.katiforis.top10.model.*;
 import com.katiforis.top10.repository.*;
 import com.katiforis.top10.services.GameService;
 import com.katiforis.top10.services.QuestionHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +22,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-
+@Slf4j
 @Service
 public class GameServiceImpl implements GameService {
-
-	private static final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
 
 	private static List<Player> playerQueue = new ArrayList();
 
@@ -45,7 +42,7 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public void findGame(FindGameDTO findGameDTO) {
-		logger.debug("Start PlayerController.login");
+		log.debug("Start GameServiceImpl.findGame");
 		ResponseEntity<GameDTO> response;
 
 		String userId = findGameDTO.getFromUserID();
@@ -94,16 +91,12 @@ public class GameServiceImpl implements GameService {
 
 			}
 		}
-
-
-
-
-		logger.debug("Start PlayerController.login");
+		log.debug("End GameServiceImpl.findGame");
 }
 
 	@Override
 	public void checkAnswer(PlayerAnswerDTO playerAnswerDTO) {
-		logger.debug("Start PlayerController.login");
+		log.debug("Start GameServiceImpl.checkAnswer");
 		ModelMapper modelMapper = new ModelMapper();
 
 		GameStateDTO gameStateDTO = gameCache.getGame(playerAnswerDTO.getGameId());
@@ -155,12 +148,12 @@ public class GameServiceImpl implements GameService {
 
 		ResponseEntity<GameDTO> response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSend("/g/" + gameStateDTO.getGameId(), response);
-		logger.debug("Start PlayerController.login");
+		log.debug("End GameServiceImpl.checkAnswer");
 
 	}
 
 	private GameStateDTO createNewGame(List<GamePlayerDTO> players) {
-		logger.debug("Start PlayerController.login");
+		log.debug("Start GameServiceImpl.createNewGame");
 
 			GameStateDTO gameStateDTO = new GameStateDTO();
 			gameStateDTO.setGameId(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
@@ -190,13 +183,13 @@ public class GameServiceImpl implements GameService {
 			//If an exception occurs then it's task executions are canceled.
 			//executor.scheduleAtFixedRate(task, 60, 60, TimeUnit.SECONDS);
 
-		logger.debug("Start PlayerController.login");
-			return gameStateDTO;
+		log.debug("End GameServiceImpl.createNewGame");
+		return gameStateDTO;
 	}
 
 	@Override
 	public void getGameState(String userId, String gameId){
-		logger.debug("Start PlayerController.login");
+		log.debug("Start GameServiceImpl.getGameState");
 		gameId = gameId.replace("\n", "").replace("\r", "");
 		userId = userId.replace("\n", "").replace("\r", "");
 
@@ -207,19 +200,19 @@ public class GameServiceImpl implements GameService {
 		ResponseEntity<GameDTO> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSendToUser(userId, "/msg", response);
 
-		logger.debug("Start PlayerController.login");
+		log.debug("End GameServiceImpl.getGameState");
 
 	}
 
 	void endGame(String gameId){
-		logger.debug("Start PlayerController.login");
+		log.debug("Start GameServiceImpl.endGame");
 
 		EndDTO endDTO = new EndDTO(gameId);
 		ResponseEntity<GameDTO> response = new ResponseEntity<>(endDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSend("/g/" + gameId, response);
 		gameCache.removeGame(gameId);
 
-		logger.debug("Start PlayerController.login");
+		log.debug("End GameServiceImpl.endGame");
 	}
 
 //	void sendCurrentTime(String gameId){

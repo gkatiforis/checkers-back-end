@@ -1,12 +1,11 @@
-package com.katiforis.top10.services.impl;//package me.xlui.im.services;
+package com.katiforis.top10.services.impl;
 
 import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
 import com.katiforis.top10.model.Answer;
 import com.katiforis.top10.model.Question;
 import com.katiforis.top10.repository.QuestionRepository;
 import com.katiforis.top10.services.QuestionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +14,9 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 public class QuestionHandlerImpl implements QuestionHandler {
-
-	private static final Logger logger = LoggerFactory.getLogger(QuestionHandlerImpl.class);
 
 	@Autowired
 	QuestionRepository questionRepository;
@@ -33,10 +30,13 @@ public class QuestionHandlerImpl implements QuestionHandler {
 	 */
 	@PostConstruct
 	public void init(){
+		log.debug("Start QuestionHandlerImpl.addAnswer");
 		questions = questionRepository.findAll();
+		log.debug("Start QuestionHandlerImpl.addAnswer");
 	}
 
 	public List<Question> getQuestions(){
+		log.debug("Start QuestionHandlerImpl.addAnswer");
 		return questions.stream()
 				.collect(Collectors.collectingAndThen(Collectors.toList(), collected -> {
 					Collections.shuffle(collected);
@@ -51,7 +51,7 @@ public class QuestionHandlerImpl implements QuestionHandler {
 	@Transactional
 	@Override
 	public Answer isAnswerValid(PlayerAnswerDTO playerAnswerDTO) {
-
+		log.debug("Start QuestionHandlerImpl.isAnswerValid");
 		String[] answers = WordHandler.convert(playerAnswerDTO.getDescription()).split("\\|");
 
 
@@ -67,11 +67,12 @@ public class QuestionHandlerImpl implements QuestionHandler {
 			Answer correctAnswer = getCorrect(correctAnswers, answer);
 			return correctAnswer;
 		}
-
+		log.debug("End QuestionHandlerImpl.isAnswerValid");
 		return null;
 	}
 
 	private int getDiffChars(String correct, String answer){
+		log.debug("Start QuestionHandlerImpl.getDiffChars");
 		if(correct.length() != answer.length()){
 			return -1;
 		}
@@ -84,11 +85,11 @@ public class QuestionHandlerImpl implements QuestionHandler {
 				match++;
 			}
 		}
-
+		log.debug("End QuestionHandlerImpl.getDiffChars");
 		return correct.length() - match;
 	}
 	private boolean isItAMatch(String correct, String answer, List<Answer> correctAnswers) {
-
+		log.debug("Start QuestionHandlerImpl.isItAMatch");
 		if (correct.equalsIgnoreCase(answer)) {
 			return true;
 		}
@@ -162,13 +163,13 @@ public class QuestionHandlerImpl implements QuestionHandler {
 		if( getDiffChars(correct, answer) == 1) {
 			return true;
 		}
-
+		log.debug("End QuestionHandlerImpl.isItAMatch");
 		return false;
 	}
 
 
 	private Answer getCorrect(List<Answer> correctAnswers, String answers) {
-
+		log.debug("Start QuestionHandlerImpl.getCorrect");
 		for (Answer correctAnswer : correctAnswers) {
 			String[] descriptionArray = WordHandler.convert(correctAnswer.getDescription().trim()).split("\\|");
 			for (String description : descriptionArray) {
@@ -187,17 +188,19 @@ public class QuestionHandlerImpl implements QuestionHandler {
 				}
 			}
 		}
+		log.debug("End QuestionHandlerImpl.getCorrect");
 		return null;
 	}
 
 
 	private Question getQuestionById(Long id) {
-
+		log.debug("Start QuestionHandlerImpl.getQuestionById");
 		for (Question question : questions) {
 			if (question.getId() == id) {
 				return question;
 			}
 		}
+		log.debug("End QuestionHandlerImpl.getQuestionById");
 		return null;
 	}
 

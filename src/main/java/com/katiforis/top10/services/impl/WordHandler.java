@@ -1,14 +1,17 @@
 
 package com.katiforis.top10.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
-
+@Slf4j
 public class WordHandler {
     private static List<String> greekCh = Arrays.asList("ΑΙ", "ΕΙ", "Η", "ΟΙ", "Υ", "Ω");
 
     public static String convert(String word) {
+        log.debug("Start WordHandler.convert");
         word = stripAccents(word);
         for (String c : greekCh) {
             String mapped = map(c);
@@ -34,10 +37,12 @@ public class WordHandler {
             }
 
         }
+        log.debug("End WordHandler.convert");
         return word;
     }
 
     private static String map(String str) {
+        log.debug("Start WordHandler.map");
         switch (str) {
             case "ΑΙ":
                 return "Ε";
@@ -54,8 +59,10 @@ public class WordHandler {
     }
 
     public static String stripAccents(String s) {
+        log.debug("Start QuestionHandlerImpl.stripAccents");
         s = Normalizer.normalize(s, Normalizer.Form.NFD);
         s = s.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        log.debug("End QuestionHandlerImpl.stripAccents");
         return s.toUpperCase();
     }
 }
