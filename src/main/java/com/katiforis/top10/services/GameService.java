@@ -1,14 +1,14 @@
 package com.katiforis.top10.services;
 
-import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
-import com.katiforis.top10.DTO.game.FindGameDTO;
+import com.katiforis.top10.DTO.game.PlayerAnswer;
+import com.katiforis.top10.DTO.game.FindGame;
 
 public interface GameService {
 
     void getGameState(String userId, String gameId);
 
-    void findGame(FindGameDTO findGameDTO);
+    void findGame(FindGame findGame);
 
-    void checkAnswer(PlayerAnswerDTO playerAnswerDTO);
+    void checkAnswer(PlayerAnswer playerAnswerDTO);
 }
 

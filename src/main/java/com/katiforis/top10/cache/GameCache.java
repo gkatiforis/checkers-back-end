@@ -1,8 +1,8 @@
 package com.katiforis.top10.cache;
 
-import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
-import com.katiforis.top10.DTO.game.GameStateDTO;
-import com.katiforis.top10.DTO.game.QuestionDTO;
+import com.katiforis.top10.DTO.game.PlayerAnswer;
+import com.katiforis.top10.DTO.game.GameState;
+import com.katiforis.top10.DTO.game.Question;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
 import org.springframework.stereotype.Component;
@@ -16,18 +16,18 @@ import static org.ehcache.config.units.MemoryUnit.MB;
 
 @Slf4j
 @Component
-public class GameCache extends GenericCacheManager<String, GameStateDTO> {
+public class GameCache extends GenericCacheManager<String, GameState> {
 
-    public boolean addAnswer(PlayerAnswerDTO playerAnswerDTO){
+    public boolean addAnswer(PlayerAnswer playerAnswerDTO){
         log.debug("Start GameCache.addAnswer");
         synchronized (this.getCache(playerAnswerDTO.getGameId())) {
-            GameStateDTO gameStateDTO = getGame(playerAnswerDTO.getGameId());
+            GameState gameStateDTO = getGame(playerAnswerDTO.getGameId());
 
-            QuestionDTO question = gameStateDTO.getQuestions()
+            Question question = gameStateDTO.getQuestions()
                     .stream().filter(questionDTO -> questionDTO.getId() == playerAnswerDTO.getQuestionId())
                     .findFirst().get();
 
-          Set<PlayerAnswerDTO> playerAnswerDTOS =  question.getCurrentAnswers();
+          Set<PlayerAnswer> playerAnswerDTOS =  question.getCurrentAnswers();
             if(playerAnswerDTOS == null){
               playerAnswerDTOS = new HashSet<>();
             }
@@ -59,21 +59,21 @@ public class GameCache extends GenericCacheManager<String, GameStateDTO> {
         log.debug("End GameCache.removeGame");
     }
 
-    public void addGame(GameStateDTO gameStateDTO){
+    public void addGame(GameState gameStateDTO){
         log.debug("Start GameCache.addGame");
-       Cache<String, GameStateDTO> cache = cacheManager.createCache(gameStateDTO.getGameId(),
-                newCacheConfigurationBuilder(String.class, GameStateDTO.class, heap(10000).offheap(1000, MB)));
+       Cache<String, GameState> cache = cacheManager.createCache(gameStateDTO.getGameId(),
+                newCacheConfigurationBuilder(String.class, GameState.class, heap(10000).offheap(1000, MB)));
         cache.put(gameStateDTO.getGameId(), gameStateDTO);
         caches.put(gameStateDTO.getGameId(), cache);
         log.debug("End GameCache.addGame");
     }
 
-    public GameStateDTO getGame(String gameId){
+    public GameState getGame(String gameId){
         log.debug("Start GameCache.getGame");
         if(gameId == null){
             return null;
         }
-        GameStateDTO gameStateDTO = this.getItem(gameId);
+        GameState gameStateDTO = this.getItem(gameId);
         log.debug("End GameCache.getGame");
         return gameStateDTO;
     }

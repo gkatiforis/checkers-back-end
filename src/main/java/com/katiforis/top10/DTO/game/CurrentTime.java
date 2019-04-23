@@ -10,6 +10,6 @@ import java.util.Date;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class CurrentTimeDTO implements Serializable {
+public class CurrentTime implements Serializable {
     private Date currentDate;
 }

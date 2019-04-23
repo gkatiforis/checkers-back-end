@@ -10,33 +10,33 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "question")
 @ToString
-public class AnswerDTO implements Serializable {
+public class Answer implements Serializable {
     private long id;
     private String displayDescription;
     private String description;
     private Integer points;
     @JsonIgnore
-    private QuestionDTO question;
+    private Question question;
 
-      public AnswerDTO(String description) {
+      public Answer(String description) {
         this.id = 0;
         this.description = description;
         this.points = 0;
         this.question = null;
     }
 
-    public AnswerDTO(String description, Integer points, QuestionDTO question) {
+    public Answer(String description, Integer points, Question question) {
         this.description = description;
         this.points = points;
         this.question = question;
     }
 
-    public AnswerDTO(String description, Integer points) {
+    public Answer(String description, Integer points) {
         this.description = description;
         this.points = points;
     }
 
-    public AnswerDTO(long id, String description, Integer points) {
+    public Answer(long id, String description, Integer points) {
         this.id =id;
         this.description = description;
         this.points = points;

@@ -1,7 +1,6 @@
 package com.katiforis.top10.controller;
 
-import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
-import com.katiforis.top10.DTO.game.FindGameDTO;
+import com.katiforis.top10.DTO.game.PlayerAnswer;
 import com.katiforis.top10.services.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +17,14 @@ public class GameController {
 	GameService gameService;
 
 	@MessageMapping("/group/word/{gameId}")
-	public void checkAnswer(@DestinationVariable String gameId, PlayerAnswerDTO playerAnswerDTO) {
+	public void checkAnswer(@DestinationVariable String gameId, PlayerAnswer playerAnswerDTO) {
 		log.debug("Start GameController.checkAnswer");
 			playerAnswerDTO.setGameId(gameId);
 			gameService.checkAnswer(playerAnswerDTO);
 		log.debug("End GameController.checkAnswer");
 	}
 
-	@MessageMapping("/chat/find")
-	public void findGame(FindGameDTO findGameDTO) {
-		log.debug("Start GameController.findGame");
-	        gameService.findGame(findGameDTO);
-		log.debug("End GameController.findGame");
-	}
-
-	@MessageMapping("/chat/gamestate")
+	@MessageMapping("/gamestate")
 	public void getGameState(String userId) {
 		log.debug("Start GameController.getGameState");
 		String [] ids = userId.split("\\|");

@@ -1,6 +1,6 @@
 package com.katiforis.top10.services.impl;
 
-import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
+import com.katiforis.top10.DTO.game.PlayerAnswer;
 import com.katiforis.top10.model.Answer;
 import com.katiforis.top10.model.Question;
 import com.katiforis.top10.repository.QuestionRepository;
@@ -50,7 +50,7 @@ public class QuestionHandlerImpl implements QuestionHandler {
 
 	@Transactional
 	@Override
-	public Answer isAnswerValid(PlayerAnswerDTO playerAnswerDTO) {
+	public Answer isAnswerValid(PlayerAnswer playerAnswerDTO) {
 		log.debug("Start QuestionHandlerImpl.isAnswerValid");
 		String[] answers = WordHandler.convert(playerAnswerDTO.getDescription()).split("\\|");
 

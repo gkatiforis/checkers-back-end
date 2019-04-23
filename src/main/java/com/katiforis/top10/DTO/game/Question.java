@@ -13,14 +13,14 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class QuestionDTO implements Serializable {
+public class Question implements Serializable {
     private long id;
     private String description;
     private QuestionDifficulty questionDifficulty;
-    private List<AnswerDTO> answers;
-    private Set<PlayerAnswerDTO> currentAnswers = new HashSet<>();
+    private List<Answer> answers;
+    private Set<PlayerAnswer> currentAnswers = new HashSet<>();
 
-    public QuestionDTO(String description, QuestionDifficulty questionDifficulty, List<AnswerDTO> answers) {
+    public Question(String description, QuestionDifficulty questionDifficulty, List<Answer> answers) {
         this.description = description;
         this.questionDifficulty = questionDifficulty;
         this.answers = answers;

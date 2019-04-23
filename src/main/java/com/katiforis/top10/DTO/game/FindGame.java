@@ -6,11 +6,11 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class FindGameDTO {
+public class FindGame {
 	private String gameId;
 	private String fromUserID;
 
-	public FindGameDTO() {
+	public FindGame() {
 		super();
 	}
 }

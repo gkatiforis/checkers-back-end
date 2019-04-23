@@ -1,12 +1,12 @@
 package com.katiforis.top10.services.impl;
 
 import com.katiforis.top10.DTO.game.*;
-
 import com.katiforis.top10.cache.GameCache;
-import com.katiforis.top10.model.*;
+import com.katiforis.top10.model.Player;
 import com.katiforis.top10.repository.*;
 import com.katiforis.top10.services.GameService;
 import com.katiforis.top10.services.QuestionHandler;
+import com.katiforis.top10.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -41,11 +41,11 @@ public class GameServiceImpl implements GameService {
 	private GameCache gameCache;
 
 	@Override
-	public void findGame(FindGameDTO findGameDTO) {
+	public void findGame(FindGame findGame) {
 		log.debug("Start GameServiceImpl.findGame");
-		ResponseEntity<GameDTO> response;
+		ResponseEntity<Game> response;
 
-		String userId = findGameDTO.getFromUserID();
+		String userId = findGame.getFromUserID();
 
 		Player player = playerRepository.findByPlayerId(userId);
 
@@ -54,13 +54,13 @@ public class GameServiceImpl implements GameService {
 			return;
 		}
 
-		GameStateDTO gameStateDTO = gameCache.getGame(findGameDTO.getGameId());
+		GameState gameStateDTO = gameCache.getGame(findGame.getGameId());
 
 		if(gameStateDTO != null){
-			StartDTO startDTO = new StartDTO();
-			startDTO.setGameId(String.valueOf(findGameDTO.getGameId()));
+			Start startDTO = new Start();
+			startDTO.setGameId(String.valueOf(findGame.getGameId()));
 			response = new ResponseEntity<>(startDTO, HttpStatus.OK);
-			simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), "/msg", response);
+			simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), Constants.MAIN_TOPIC, response);
 			return;
 
 		}else{
@@ -70,18 +70,18 @@ public class GameServiceImpl implements GameService {
 
 				ModelMapper modelMapper = new ModelMapper();
 				modelMapper.getConfiguration().setAmbiguityIgnored(true);
-				GamePlayerDTO gamePlayerDTO = 	modelMapper.map(player1, GamePlayerDTO.class);
-				GamePlayerDTO gamePlayerDTO2 = 	modelMapper.map(player2, GamePlayerDTO.class);
-				List<GamePlayerDTO> players = new ArrayList<>();
-				players.add(gamePlayerDTO);
-				players.add(gamePlayerDTO2);
+				GamePlayer gamePlayer = 	modelMapper.map(player1, GamePlayer.class);
+				GamePlayer gamePlayer2 = 	modelMapper.map(player2, GamePlayer.class);
+				List<GamePlayer> players = new ArrayList<>();
+				players.add(gamePlayer);
+				players.add(gamePlayer2);
 
-				GameStateDTO newGame = createNewGame(players);
-				StartDTO startDTO = new StartDTO();
+				GameState newGame = createNewGame(players);
+				Start startDTO = new Start();
 				startDTO.setGameId(String.valueOf(newGame.getGameId()));
 				response = new ResponseEntity<>(startDTO, HttpStatus.OK);
-				simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), "/msg", response);
-				simpMessagingTemplate.convertAndSendToUser(String.valueOf(player1.getPlayerId()), "/msg", response);
+				simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), Constants.MAIN_TOPIC, response);
+				simpMessagingTemplate.convertAndSendToUser(String.valueOf(player1.getPlayerId()), Constants.MAIN_TOPIC, response);
 				playerQueue.clear();
 			}else{
 
@@ -95,44 +95,44 @@ public class GameServiceImpl implements GameService {
 }
 
 	@Override
-	public void checkAnswer(PlayerAnswerDTO playerAnswerDTO) {
+	public void checkAnswer(PlayerAnswer playerAnswerDTO) {
 		log.debug("Start GameServiceImpl.checkAnswer");
 		ModelMapper modelMapper = new ModelMapper();
 
-		GameStateDTO gameStateDTO = gameCache.getGame(playerAnswerDTO.getGameId());
+		GameState gameStateDTO = gameCache.getGame(playerAnswerDTO.getGameId());
 
 		if(gameStateDTO == null){
 			return;
 		}
 
-		Answer correctAnswer = questionHandler.isAnswerValid(playerAnswerDTO);
+		com.katiforis.top10.model.Answer correctAnswer = questionHandler.isAnswerValid(playerAnswerDTO);
 
 		if(correctAnswer != null){
-			AnswerDTO answerDTO = 	modelMapper.map(correctAnswer, AnswerDTO.class);
+			Answer answer = 	modelMapper.map(correctAnswer, Answer.class);
 
-			if(answerDTO.getDisplayDescription() == null || answerDTO.getDisplayDescription().isEmpty()){
-				playerAnswerDTO.setDescription(answerDTO.getDescription());
+			if(answer.getDisplayDescription() == null || answer.getDisplayDescription().isEmpty()){
+				playerAnswerDTO.setDescription(answer.getDescription());
 			}else {
-				playerAnswerDTO.setDescription(answerDTO.getDisplayDescription());
+				playerAnswerDTO.setDescription(answer.getDisplayDescription());
 			}
 
-			playerAnswerDTO.setPoints(answerDTO.getPoints());
+			playerAnswerDTO.setPoints(answer.getPoints());
 			boolean isDuplicateAnswer = gameCache.addAnswer(playerAnswerDTO);
 
 			if(!isDuplicateAnswer){
 
 				if(correctAnswer.getDisplayDescription() == null){
 					String[] descriptionArray = correctAnswer.getDescription().split("\\|");
-					answerDTO.setDisplayDescription(descriptionArray[0]);
+					answer.setDisplayDescription(descriptionArray[0]);
 				}
 			//	playerAnswerDTO.setAnswer(answerDTO);
-				playerAnswerDTO.setPoints(answerDTO.getPoints());
+				playerAnswerDTO.setPoints(answer.getPoints());
 				playerAnswerDTO.setCorrect(true);
 
 			}else{
 				if(correctAnswer.getDisplayDescription() == null){
 					String[] descriptionArray = correctAnswer.getDescription().split("\\|");
-					answerDTO.setDisplayDescription(descriptionArray[0]);
+					answer.setDisplayDescription(descriptionArray[0]);
 				}
 
 				playerAnswerDTO.setPoints(0);
@@ -146,22 +146,22 @@ public class GameServiceImpl implements GameService {
 			gameCache.addAnswer(playerAnswerDTO);
 		}
 
-		ResponseEntity<GameDTO> response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSend("/g/" + gameStateDTO.getGameId(), response);
+		ResponseEntity<Game> response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
+		simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameStateDTO.getGameId(), response);
 		log.debug("End GameServiceImpl.checkAnswer");
 
 	}
 
-	private GameStateDTO createNewGame(List<GamePlayerDTO> players) {
+	private GameState createNewGame(List<GamePlayer> players) {
 		log.debug("Start GameServiceImpl.createNewGame");
 
-			GameStateDTO gameStateDTO = new GameStateDTO();
+			GameState gameStateDTO = new GameState();
 			gameStateDTO.setGameId(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
 		ModelMapper modelMapper = new ModelMapper();
 
-		    List<QuestionDTO> questionDTO = modelMapper.map(questionHandler.getQuestions(), new TypeToken<List<QuestionDTO>>() {}.getType());
+		    List<Question> question = modelMapper.map(questionHandler.getQuestions(), new TypeToken<List<Question>>() {}.getType());
 
-			gameStateDTO.setQuestions(questionDTO);
+			gameStateDTO.setQuestions(question);
 			gameStateDTO.setPlayers(players);
 
 			Date now = new Date();
@@ -193,12 +193,12 @@ public class GameServiceImpl implements GameService {
 		gameId = gameId.replace("\n", "").replace("\r", "");
 		userId = userId.replace("\n", "").replace("\r", "");
 
-		GameStateDTO gameStateDTO = gameCache.getGame(gameId);
+		GameState gameStateDTO = gameCache.getGame(gameId);
 		Date now = new Date();
 		gameStateDTO.setCurrentDate(now);
 
-		ResponseEntity<GameDTO> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(userId, "/msg", response);
+		ResponseEntity<Game> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
+		simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
 
 		log.debug("End GameServiceImpl.getGameState");
 
@@ -207,55 +207,11 @@ public class GameServiceImpl implements GameService {
 	void endGame(String gameId){
 		log.debug("Start GameServiceImpl.endGame");
 
-		EndDTO endDTO = new EndDTO(gameId);
-		ResponseEntity<GameDTO> response = new ResponseEntity<>(endDTO, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSend("/g/" + gameId, response);
+		End endDTO = new End(gameId);
+		ResponseEntity<Game> response = new ResponseEntity<>(endDTO, HttpStatus.OK);
+		simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameId, response);
 		gameCache.removeGame(gameId);
 
 		log.debug("End GameServiceImpl.endGame");
 	}
-
-//	void sendCurrentTime(String gameId){
-//		CurrentTimeDTO currentTimeDTO = new CurrentTimeDTO();
-//		currentTimeDTO.setCurrentDate(Calendar.getInstance().getTime());
-//
-//		GameDTO messageWrapper = new GameDTO("currentTime", currentTimeDTO);
-//		ResponseEntity<GameDTO> response = new ResponseEntity<>(	messageWrapper, HttpStatus.OK);
-//		simpMessagingTemplate.convertAndSend("/g/" + gameId, response);
-//	}
-
-
-
-//	private GameStateDTO mapActiveGameToGameState(ActiveGameDTO activeGame){
-//		logger.debug("Start PlayerController.login");
-//		GameStateDTO gameStateDTO = new GameStateDTO();
-//
-//
-//
-//		List<GamePlayerDTO> gamePlayerDTOS = new ArrayList<>();
-//
-//		for(PlayerDTO playerDTO:activeGame.getPlayers()){
-//
-//			//TODO fetch points dynamically
-//			gamePlayerDTOS.add(		new GamePlayerDTO(playerDTO.getPlayerId(), playerDTO.getUsername(),  12));
-//		}
-//
-//
-//
-//		gameStateDTO.setPlayers(gamePlayerDTOS);
-//		gameStateDTO.setCurrentAnswers(activeGame.getActiveGameAnswers());
-//		gameStateDTO.setQuestions(activeGame.getQuestions());
-//
-//
-//		Calendar cal = Calendar.getInstance();
-//		Date now = cal.getTime();
-//
-//		//cal.add(Calendar.SECOND, -0);
-//		Date started = activeGame.getDate_started();
-//
-//		gameStateDTO.setCurrentDate(now);
-//		gameStateDTO.setDateStarted(started);
-//		logger.debug("Start PlayerController.login");
-//		return gameStateDTO;
-//	}
 }

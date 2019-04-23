@@ -1,6 +1,6 @@
 package com.katiforis.top10.services;
 
-import com.katiforis.top10.DTO.game.PlayerAnswerDTO;
+import com.katiforis.top10.DTO.game.PlayerAnswer;
 import com.katiforis.top10.model.Answer;
 import com.katiforis.top10.model.Question;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +13,6 @@ public interface QuestionHandler {
     List<Question> getQuestions();
 
     @Transactional
-    Answer isAnswerValid(PlayerAnswerDTO playerAnswerDTO);
+    Answer isAnswerValid(PlayerAnswer playerAnswerDTO);
 }
 
