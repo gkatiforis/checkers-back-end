@@ -1,6 +1,7 @@
 package com.katiforis.top10.controller;
 
 import com.katiforis.top10.DTO.game.*;
+import com.katiforis.top10.DTO.game.request.GetNotificationsRequest;
 import com.katiforis.top10.repository.PlayerRepository;
 import com.katiforis.top10.services.GameService;
 import com.katiforis.top10.util.Constants;
@@ -71,15 +72,13 @@ public class PlayerController {
 	}
 
 	@MessageMapping("/notification")
-	ResponseEntity getNotificationList(Player player) {
+	ResponseEntity getNotificationList(GetNotificationsRequest get) {
 		log.debug("Start PlayerController.getNotificationList");
-
-
 		NotificationList notificationList = new NotificationList();
 		notificationList.setNotifications((Arrays.asList(new Notification("test test", "22/02/2019"))));
-		notificationList.setUserId(player.getPlayerId());
+		notificationList.setUserId(get.getPlayerId());
 		ResponseEntity<NotificationList> response = new ResponseEntity<>(notificationList, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(player.getPlayerId(), Constants.MAIN_TOPIC, response);
+		simpMessagingTemplate.convertAndSendToUser(get.getPlayerId(), Constants.MAIN_TOPIC, response);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

@@ -46,6 +46,7 @@ CREATE TABLE player (
   bonus_points INT NOT NULL
 );
 
+# TODO: implement TABLE_PER_CLASS inheritance
 CREATE TABLE friend_invitation (
   id BIGINT PRIMARY KEY auto_increment,
   from_player_id BIGINT NOT NULL,
@@ -85,7 +86,30 @@ CREATE TABLE friendship(
   UNIQUE KEY friendship_player (player_id1, player_id2)
 );
 
+# TODO: implement TABLE_PER_CLASS inheritance
+CREATE TABLE notification (
+  id BIGINT PRIMARY KEY auto_increment,
+  is_new BOOLEAN NOT NULL DEFAULT TRUE,
+   creation_date DATETIME
+);
+
+CREATE TABLE invite_notification (
+  id BIGINT PRIMARY KEY auto_increment,
+  is_new BOOLEAN NOT NULL DEFAULT TRUE,
+  creation_date DATETIME,
+  invitation_id BIGINT
+);
+
+CREATE TABLE message_notification (
+   id BIGINT PRIMARY KEY auto_increment,
+   is_new BOOLEAN NOT NULL DEFAULT TRUE,
+   creation_date DATETIME,
+   description VARCHAR(500)
+);
+
+-- -- -- -- -- -- -- -- -- -- -- --
 -- Populate data
+-- -- -- -- -- -- -- -- -- -- -- --
 insert into question_difficulty(description)
 values('LOW'), ('MEDIUM'), ('HARD');
 
