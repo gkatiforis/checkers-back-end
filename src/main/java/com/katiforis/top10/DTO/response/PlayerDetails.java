@@ -1,4 +1,4 @@
-package com.katiforis.top10.DTO.game;
+package com.katiforis.top10.DTO.response;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,12 +9,12 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class PlayerDetails extends Game {
+public class PlayerDetails extends BaseResponse {
     private String username;
     public PlayerDetails(String status) {
         super(status);
     }
     public PlayerDetails() {
-        super(GameResponseState.PLAYER_DETAILS.getState());
+        super(ResponseState.PLAYER_DETAILS.getState());
     }
 }

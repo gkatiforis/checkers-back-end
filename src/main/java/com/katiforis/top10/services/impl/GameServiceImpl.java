@@ -1,6 +1,14 @@
 package com.katiforis.top10.services.impl;
 
-import com.katiforis.top10.DTO.game.*;
+import com.katiforis.top10.DTO.Answer;
+import com.katiforis.top10.DTO.GamePlayer;
+import com.katiforis.top10.DTO.PlayerAnswer;
+import com.katiforis.top10.DTO.Question;
+import com.katiforis.top10.DTO.request.FindGame;
+import com.katiforis.top10.DTO.response.End;
+import com.katiforis.top10.DTO.response.GameResponse;
+import com.katiforis.top10.DTO.response.GameState;
+import com.katiforis.top10.DTO.response.Start;
 import com.katiforis.top10.cache.GameCache;
 import com.katiforis.top10.model.Player;
 import com.katiforis.top10.repository.*;
@@ -43,9 +51,9 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void findGame(FindGame findGame) {
 		log.debug("Start GameServiceImpl.findGame");
-		ResponseEntity<Game> response;
+		ResponseEntity<GameResponse> response;
 
-		String userId = findGame.getFromUserID();
+		String userId = findGame.getPlayerId();
 
 		Player player = playerRepository.findByPlayerId(userId);
 
@@ -57,8 +65,7 @@ public class GameServiceImpl implements GameService {
 		GameState gameStateDTO = gameCache.getGame(findGame.getGameId());
 
 		if(gameStateDTO != null){
-			Start startDTO = new Start();
-			startDTO.setGameId(String.valueOf(findGame.getGameId()));
+			Start startDTO = new Start(String.valueOf(findGame.getGameId()));
 			response = new ResponseEntity<>(startDTO, HttpStatus.OK);
 			simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), Constants.MAIN_TOPIC, response);
 			return;
@@ -77,8 +84,7 @@ public class GameServiceImpl implements GameService {
 				players.add(gamePlayer2);
 
 				GameState newGame = createNewGame(players);
-				Start startDTO = new Start();
-				startDTO.setGameId(String.valueOf(newGame.getGameId()));
+				Start startDTO = new Start(String.valueOf(newGame.getGameId()));
 				response = new ResponseEntity<>(startDTO, HttpStatus.OK);
 				simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), Constants.MAIN_TOPIC, response);
 				simpMessagingTemplate.convertAndSendToUser(String.valueOf(player1.getPlayerId()), Constants.MAIN_TOPIC, response);
@@ -146,7 +152,7 @@ public class GameServiceImpl implements GameService {
 			gameCache.addAnswer(playerAnswerDTO);
 		}
 
-		ResponseEntity<Game> response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
+		ResponseEntity<GameResponse> response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameStateDTO.getGameId(), response);
 		log.debug("End GameServiceImpl.checkAnswer");
 
@@ -155,8 +161,7 @@ public class GameServiceImpl implements GameService {
 	private GameState createNewGame(List<GamePlayer> players) {
 		log.debug("Start GameServiceImpl.createNewGame");
 
-			GameState gameStateDTO = new GameState();
-			gameStateDTO.setGameId(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
+			GameState gameStateDTO = new GameState(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
 		ModelMapper modelMapper = new ModelMapper();
 
 		    List<Question> question = modelMapper.map(questionHandler.getQuestions(), new TypeToken<List<Question>>() {}.getType());
@@ -197,7 +202,7 @@ public class GameServiceImpl implements GameService {
 		Date now = new Date();
 		gameStateDTO.setCurrentDate(now);
 
-		ResponseEntity<Game> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
+		ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
 
 		log.debug("End GameServiceImpl.getGameState");
@@ -208,7 +213,7 @@ public class GameServiceImpl implements GameService {
 		log.debug("Start GameServiceImpl.endGame");
 
 		End endDTO = new End(gameId);
-		ResponseEntity<Game> response = new ResponseEntity<>(endDTO, HttpStatus.OK);
+		ResponseEntity<GameResponse> response = new ResponseEntity<>(endDTO, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameId, response);
 		gameCache.removeGame(gameId);
 

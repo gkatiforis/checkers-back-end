@@ -1,6 +1,6 @@
 package com.katiforis.top10.controller;
 
-import com.katiforis.top10.DTO.game.PlayerAnswer;
+import com.katiforis.top10.DTO.PlayerAnswer;
 import com.katiforis.top10.services.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

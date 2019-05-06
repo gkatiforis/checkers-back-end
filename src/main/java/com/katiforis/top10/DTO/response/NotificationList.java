@@ -1,10 +1,12 @@
-package com.katiforis.top10.DTO.game;
+package com.katiforis.top10.DTO.response;
 
+
+import com.katiforis.top10.DTO.Notification;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotificationList extends Game {
+public class NotificationList extends BaseResponse {
     List<Notification> notifications = new ArrayList<>();
     public NotificationList(String status) {
         super(status);
@@ -14,12 +16,8 @@ public class NotificationList extends Game {
         super(gameId, status);
     }
 
-    public NotificationList(String status, String gameId, String userId) {
-        super(status, gameId, userId);
-    }
-
     public NotificationList() {
-        super(GameResponseState.NOTIFICATION_LIST.getState());
+        super(ResponseState.NOTIFICATION_LIST.getState());
     }
 
     public List<Notification> getNotifications() {

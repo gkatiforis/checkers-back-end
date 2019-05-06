@@ -1,4 +1,4 @@
-package com.katiforis.top10.DTO.game;
+package com.katiforis.top10.DTO;
 
 import com.katiforis.top10.model.QuestionDifficulty;
 import lombok.*;

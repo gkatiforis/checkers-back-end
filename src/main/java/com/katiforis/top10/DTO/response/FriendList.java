@@ -1,4 +1,4 @@
-package com.katiforis.top10.DTO.game;
+package com.katiforis.top10.DTO.response;
 
 import com.katiforis.top10.model.Player;
 import lombok.EqualsAndHashCode;
@@ -13,12 +13,12 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class FriendList extends Game {
+public class FriendList extends BaseResponse {
     List<Player> players = new ArrayList<>();
     public FriendList(String status) {
         super(status);
     }
     public FriendList() {
-        super(GameResponseState.FRIEND_LIST.getState());
+        super(ResponseState.FRIEND_LIST.getState());
     }
 }

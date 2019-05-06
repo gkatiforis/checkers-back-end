@@ -1,4 +1,4 @@
-package com.katiforis.top10.DTO.game;
+package com.katiforis.top10.DTO;
 
 import lombok.*;
 
@@ -13,6 +13,7 @@ public class Player implements Serializable {
     private long id;
     private String playerId;
     private String username;
+    private String imageUrl;
 
     public Player(String username) {
         this.username = username;

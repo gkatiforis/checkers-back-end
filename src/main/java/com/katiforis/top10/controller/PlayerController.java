@@ -1,6 +1,11 @@
 package com.katiforis.top10.controller;
 
-import com.katiforis.top10.DTO.game.*;
+import com.katiforis.top10.DTO.Notification;
+import com.katiforis.top10.DTO.Player;
+import com.katiforis.top10.DTO.request.FindGame;
+import com.katiforis.top10.DTO.request.GetNotifications;
+import com.katiforis.top10.DTO.request.GetRank;
+import com.katiforis.top10.DTO.response.*;
 import com.katiforis.top10.repository.PlayerRepository;
 import com.katiforis.top10.services.GameService;
 import com.katiforis.top10.util.Constants;
@@ -71,15 +76,38 @@ public class PlayerController {
 	}
 
 	@MessageMapping("/notification")
-	ResponseEntity getNotificationList(Player player) {
+	ResponseEntity getNotificationList(GetNotifications get) {
 		log.debug("Start PlayerController.getNotificationList");
-
-
 		NotificationList notificationList = new NotificationList();
 		notificationList.setNotifications((Arrays.asList(new Notification("test test", "22/02/2019"))));
-		notificationList.setUserId(player.getPlayerId());
+		notificationList.setUserId(get.getPlayerId());
 		ResponseEntity<NotificationList> response = new ResponseEntity<>(notificationList, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(player.getPlayerId(), Constants.MAIN_TOPIC, response);
+		simpMessagingTemplate.convertAndSendToUser(get.getPlayerId(), Constants.MAIN_TOPIC, response);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@MessageMapping("/rank")
+	ResponseEntity getRankList(GetRank get) {
+		log.debug("Start PlayerController.getRankList");
+		RankList rankList = new RankList();
+		rankList.setPlayers(Arrays.asList( new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatdiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis")
+				,new Player( "id","gkatiforis"),
+				new Player( "id","gkatiforis"),
+				new Player( "id","gkatiforis"),
+				new Player( "id","gkatiforis"),
+				new Player( "id","gkatiforis"),
+				new Player( "id","gkatiforis")));
+		rankList.setUserId(get.getPlayerId());
+		ResponseEntity<RankList> response = new ResponseEntity<>(rankList, HttpStatus.OK);
+		simpMessagingTemplate.convertAndSendToUser(get.getPlayerId(), Constants.MAIN_TOPIC, response);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

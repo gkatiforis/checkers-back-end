@@ -1,4 +1,4 @@
-package com.katiforis.top10.DTO.game;
+package com.katiforis.top10.DTO.request;
 
 import lombok.*;
 
@@ -6,9 +6,8 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class FindGame {
+public class FindGame extends BaseRequest {
 	private String gameId;
-	private String fromUserID;
 
 	public FindGame() {
 		super();

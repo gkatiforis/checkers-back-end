@@ -1,8 +1,8 @@
 package com.katiforis.top10.cache;
 
-import com.katiforis.top10.DTO.game.PlayerAnswer;
-import com.katiforis.top10.DTO.game.GameState;
-import com.katiforis.top10.DTO.game.Question;
+import com.katiforis.top10.DTO.PlayerAnswer;
+import com.katiforis.top10.DTO.response.GameState;
+import com.katiforis.top10.DTO.Question;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
 import org.springframework.stereotype.Component;
