@@ -22,19 +22,16 @@ public class Question implements Serializable, Comparable<Question>{
     @Column(name = "description")
     private String description;
 
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "question_difficulty_id")
     private QuestionDifficulty questionDifficulty;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "question_category_id")
+    private QuestionCategory questionCategory;
+
     @OneToMany(mappedBy="question", fetch = FetchType.EAGER)
     private List<Answer> answers;
-
-    public Question(String description, QuestionDifficulty questionDifficulty, List<Answer> answers) {
-        this.description = description;
-        this.questionDifficulty = questionDifficulty;
-        this.answers = answers;
-    }
 
     @Override
     public int compareTo(Question o) {

@@ -4,6 +4,7 @@ use  top10;
 SET CHARSET 'utf8';
 
 DROP TABLE IF EXISTS question_difficulty;
+DROP TABLE IF EXISTS question_category;
 DROP TABLE IF EXISTS answer;
 DROP TABLE IF EXISTS friendship;
 DROP TABLE IF EXISTS friend_invitation;
@@ -17,11 +18,18 @@ CREATE TABLE question_difficulty (
   description VARCHAR(80) NOT NULL
 );
 
+CREATE TABLE question_category (
+   id BIGINT PRIMARY KEY auto_increment,
+   name VARCHAR(100) NOT NULL
+);
+
 CREATE TABLE question (
   id BIGINT PRIMARY KEY auto_increment,
   description VARCHAR(500) NOT NULL,
   question_difficulty_id BIGINT NOT NULL,
-  FOREIGN KEY (question_difficulty_id) REFERENCES question_difficulty(id)
+  question_category_id BIGINT NOT NULL,
+  FOREIGN KEY (question_difficulty_id) REFERENCES question_difficulty(id),
+  FOREIGN KEY (question_category_id) REFERENCES question_category(id)
 );
 
 CREATE TABLE answer (
@@ -89,16 +97,24 @@ CREATE TABLE friendship(
 insert into question_difficulty(description)
 values('LOW'), ('MEDIUM'), ('HARD');
 
-insert into question(description, question_difficulty_id)values
-  ('Οχήματα με ρόδες', 1),
-  ('Site κοινωνικής δικτύωσης', 1),
-  ('Γλώσσες προγραμματισμού ', 1),
+insert into question_category(name)values
+('Αθλητικά'),
+('Ιστορία'),
+('Γενικές γνώσεις'),
+('Επιστήμη-Τεχνολογία'),
+('Μουσική-Κινηματογράφος'),
+('Γεωγραφία');
 
-  ('Οι μεγαλύτεροι έλληνες ηθοποιοί των 80s', 2),
+insert into question(description, question_difficulty_id, question_category_id)values
+  ('Οχήματα με ρόδες', 1, 3),
+  ('Site κοινωνικής δικτύωσης', 3, 4),
+  ('Γλώσσες προγραμματισμού ', 1, 4),
+
+  ('Οι μεγαλύτεροι έλληνες ηθοποιοί των 80s', 2, 5),
 #   ('Φράσεις απο παιδικά', 2),
-   ('Γνωστά επιτραπέζια', 2),
+   ('Γνωστά επιτραπέζια', 2, 3),
 
-('Φράσεις από διαφημίσεις', 3);
+('Φράσεις από διαφημίσεις', 3, 5);
 #   ('Παραδοσιακά ελληνικά φαγητά', 2),
 #
 #   ('Διάσημοι ζωγράφοι', 3),
@@ -169,3 +185,4 @@ insert into answer(question_id, description, display_description,  points)values
 
 SELECT  * from answer;
 SELECT  * from question;
+SELECT  * from question_category;
