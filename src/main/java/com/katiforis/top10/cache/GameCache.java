@@ -1,5 +1,6 @@
 package com.katiforis.top10.cache;
 
+import com.katiforis.top10.DTO.PlayerDto;
 import com.katiforis.top10.DTO.PlayerAnswer;
 import com.katiforis.top10.DTO.response.GameState;
 import com.katiforis.top10.DTO.Question;
@@ -32,13 +33,11 @@ public class GameCache extends GenericCacheManager<String, GameState> {
               playerAnswerDTOS = new HashSet<>();
             }
 
-            gameStateDTO.getPlayers()
-                    .stream()
-                    .filter(player -> player.getPlayerId().equals(playerAnswerDTO.getUserId()))
-                    .forEach(player -> {
-                        player.setPoints(player.getPoints() + playerAnswerDTO.getPoints());
-                        playerAnswerDTO.setPlayer(player);
-                    });
+            PlayerDto playerDto = gameStateDTO.getPlayers().stream()
+                    .filter(p -> p.getPlayerId().equals(playerAnswerDTO.getUserId()))
+                    .findFirst().get();
+            playerDto.getPlayerDetails().setEloExtra(playerDto.getPlayerDetails().getEloExtra() + playerAnswerDTO.getPoints());
+            playerAnswerDTO.setPlayer(playerDto);
 
             boolean isDuplicateAnswer = !playerAnswerDTOS.add(playerAnswerDTO);
 

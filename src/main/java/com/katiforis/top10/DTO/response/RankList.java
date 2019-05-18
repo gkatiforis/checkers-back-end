@@ -1,14 +1,13 @@
 package com.katiforis.top10.DTO.response;
 
 
-import com.katiforis.top10.DTO.Player;
-import com.katiforis.top10.DTO.response.BaseResponse;
+import com.katiforis.top10.DTO.PlayerDto;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RankList extends BaseResponse {
-    List<Player> players = new ArrayList<>();
+    List<PlayerDto> playerDtos = new ArrayList<>();
 
     public RankList(String status) {
         super(status);
@@ -21,11 +20,11 @@ public class RankList extends BaseResponse {
         super(gameId, status);
     }
 
-    public List<Player> getPlayers() {
-        return players;
+    public List<PlayerDto> getPlayerDtos() {
+        return playerDtos;
     }
 
-    public void setPlayers(List<Player> players) {
-        this.players = players;
+    public void setPlayerDtos(List<PlayerDto> playerDtos) {
+        this.playerDtos = playerDtos;
     }
 }

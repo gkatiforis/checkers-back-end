@@ -9,12 +9,12 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class PlayerDetails extends BaseResponse {
+public class Profile extends BaseResponse {
     private String username;
-    public PlayerDetails(String status) {
+    public Profile(String status) {
         super(status);
     }
-    public PlayerDetails() {
+    public Profile() {
         super(ResponseState.PLAYER_DETAILS.getState());
     }
 }

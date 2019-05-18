@@ -26,17 +26,8 @@ public class Player implements Serializable {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "elo")
-    private Integer elo;
-
-    @Column(name = "level")
-    private Integer level;
-
-    @Column(name = "level_points")
-    private Integer levelPoints;
-
-    @Column(name = "bonus_points")
-    private Integer bonusPoints;
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PlayerDetails playerDetails;
 
     @OneToMany(mappedBy = "from", fetch = FetchType.LAZY)
     private List<FriendInvitation> myFriendInvitations = new ArrayList<>();
@@ -60,9 +51,5 @@ public class Player implements Serializable {
     public Player(String playerId, String username) {
         this.playerId = playerId;
         this.username = username;
-        this.elo = 0;
-        this.levelPoints = 0;
-        this.level = 0;
-        this.bonusPoints = 0;
     }
 }

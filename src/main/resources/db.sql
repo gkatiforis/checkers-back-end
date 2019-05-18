@@ -47,11 +47,15 @@ ALTER TABLE question CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 CREATE TABLE player (
   id BIGINT PRIMARY KEY auto_increment,
   player_id VARCHAR(200) NOT NULL UNIQUE,
-  username VARCHAR(200) NOT NULL UNIQUE,
+  username VARCHAR(200) NOT NULL UNIQUE
+);
+
+CREATE TABLE player_details (
+  player_id BIGINT PRIMARY KEY,
   elo INT NOT NULL,
   level INT NOT NULL,
   level_points INT NOT NULL,
-  bonus_points INT NOT NULL
+  coins INT NOT NULL
 );
 
 CREATE TABLE friend_invitation (
@@ -59,7 +63,7 @@ CREATE TABLE friend_invitation (
   from_player_id BIGINT NOT NULL,
   to_player_id BIGINT NOT NULL,
   request_date DATETIME NOT NULL,
-  UNIQUE KEY friend_invitation_players (from_player_id, to_player_id)
+  UNIQUE KEY friend_invitation (from_player_id, to_player_id)
 );
 
 CREATE TABLE game_invitation (
@@ -69,7 +73,7 @@ CREATE TABLE game_invitation (
   status_id INT NOT NULL,
   is_private BOOLEAN NOT NULL,
   request_date DATETIME NOT NULL,
-  UNIQUE KEY game_invitation_players (from_player_id, to_player_id)
+  UNIQUE KEY game_invitation (from_player_id, to_player_id)
 );
 
 CREATE TABLE game_invitation_status (
@@ -182,6 +186,13 @@ insert into answer(question_id, description, display_description,  points)values
   (6,  'κορμί|πατριώτη', 'Το χάσαμε το κορμί πατριώτη',  4),
   (6,  'Τρατζικ', 'Τρατζικ', 4),
   (6,  'καμπάνα', 'Σήμα καμπάνα',  4);
+
+insert into player( player_id, username)values
+(102611879418639905272,	'Katiforis Lefteris'),
+(112815880341047863213,	'George Katiforis');
+insert into player_details(player_id,  coins, elo, level, level_points )values
+(1, 100,	1990, 40, 234),
+(2, 1000,	1690, 45, 2);
 
 SELECT  * from answer;
 SELECT  * from question;

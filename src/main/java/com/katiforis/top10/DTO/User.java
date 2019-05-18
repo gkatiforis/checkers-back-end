@@ -9,18 +9,19 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class Player implements Serializable {
+public class User implements Serializable {
     private long id;
-    private String playerId;
     private String username;
     private String imageUrl;
 
-    public Player(String username) {
+    public User(String username) {
         this.username = username;
     }
 
-    public Player(String playerId, String username) {
-        this.playerId = playerId;
+
+    public User(long id, String username, String imageUrl) {
+        this.id = id;
         this.username = username;
+        this.imageUrl = imageUrl;
     }
 }

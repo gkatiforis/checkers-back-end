@@ -14,7 +14,7 @@ public class PlayerAnswer extends GameResponse {
     private boolean isCorrect = false;
     private boolean hasAlreadyBeenSaid = false;
     private long questionId;
-    private GamePlayer player;
+    private PlayerDto player;
 
     public PlayerAnswer(String status, String gameId) {
         super(status, gameId);

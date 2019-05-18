@@ -1,11 +1,12 @@
 package com.katiforis.top10.controller;
 
 import com.katiforis.top10.DTO.Notification;
-import com.katiforis.top10.DTO.Player;
+import com.katiforis.top10.DTO.PlayerDto;
 import com.katiforis.top10.DTO.request.FindGame;
 import com.katiforis.top10.DTO.request.GetNotifications;
 import com.katiforis.top10.DTO.request.GetRank;
 import com.katiforis.top10.DTO.response.*;
+import com.katiforis.top10.model.Player;
 import com.katiforis.top10.repository.PlayerRepository;
 import com.katiforis.top10.services.GameService;
 import com.katiforis.top10.util.Constants;
@@ -36,7 +37,7 @@ public class PlayerController {
 	private SimpMessagingTemplate simpMessagingTemplate;
 
 	@MessageMapping("/login")
-	ResponseEntity login(Player playerDTO) {
+	ResponseEntity login(PlayerDto playerDTO) {
 		log.debug("Start PlayerController.login");
 
 		com.katiforis.top10.model.Player player = playerRepository.findByPlayerId(playerDTO.getPlayerId());
@@ -48,20 +49,20 @@ public class PlayerController {
 
 		log.debug("End PlayerController.login");
 
-		PlayerDetails playerDetailsDTO = new PlayerDetails();
-		playerDetailsDTO.setUsername(player.getUsername());
-		ResponseEntity<PlayerDetails> response = new ResponseEntity<>(playerDetailsDTO, HttpStatus.OK);
+		Profile profile = new Profile();
+		profile.setUsername(player.getUsername());
+		ResponseEntity<Profile> response = new ResponseEntity<>(profile, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSendToUser(player.getPlayerId(), Constants.MAIN_TOPIC, response);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@MessageMapping("/friend")
-	ResponseEntity getFriendList(Player playerDTO) {
+	ResponseEntity getFriendList(PlayerDto playerDTO) {
 		log.debug("Start PlayerController.getFriendlist");
 
-		com.katiforis.top10.model.Player player = playerRepository.findByPlayerId(playerDTO.getPlayerId());
+		Player player = playerRepository.findByPlayerId(playerDTO.getPlayerId());
 
-		com.katiforis.top10.model.Player player1 = new com.katiforis.top10.model.Player( "id","gkatiforis");
+		Player player1 = new com.katiforis.top10.model.Player( "id","gkatiforis");
 		com.katiforis.top10.model.Player player2 = new com.katiforis.top10.model.Player( "id","gkatiforis");
 
 		List<com.katiforis.top10.model.Player> players = new ArrayList<>();
@@ -90,21 +91,21 @@ public class PlayerController {
 	ResponseEntity getRankList(GetRank get) {
 		log.debug("Start PlayerController.getRankList");
 		RankList rankList = new RankList();
-		rankList.setPlayers(Arrays.asList( new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatdiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis")
-				,new Player( "id","gkatiforis"),
-				new Player( "id","gkatiforis"),
-				new Player( "id","gkatiforis"),
-				new Player( "id","gkatiforis"),
-				new Player( "id","gkatiforis"),
-				new Player( "id","gkatiforis")));
+		rankList.setPlayerDtos(Arrays.asList( new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatdiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis")
+				,new PlayerDto( "id","gkatiforis"),
+				new PlayerDto( "id","gkatiforis"),
+				new PlayerDto( "id","gkatiforis"),
+				new PlayerDto( "id","gkatiforis"),
+				new PlayerDto( "id","gkatiforis"),
+				new PlayerDto( "id","gkatiforis")));
 		rankList.setUserId(get.getPlayerId());
 		ResponseEntity<RankList> response = new ResponseEntity<>(rankList, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSendToUser(get.getPlayerId(), Constants.MAIN_TOPIC, response);
@@ -112,7 +113,7 @@ public class PlayerController {
 	}
 
 	@MessageMapping("/lobby")
-	ResponseEntity getLobby(Player player) {
+	ResponseEntity getLobby(PlayerDto playerDto) {
 		log.debug("Start PlayerController.getLobby");
 
 		Lobby lobby = new Lobby();
@@ -121,10 +122,10 @@ public class PlayerController {
 
 		List<com.katiforis.top10.model.Player> players = new ArrayList<>();
 		players.add(player1);players.add(player2);
-		lobby.setUserId(player.getPlayerId());
+		lobby.setUserId(playerDto.getPlayerId());
 		lobby.setPlayers(players);
 		ResponseEntity<Lobby> response = new ResponseEntity<>(lobby, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(player.getPlayerId(), Constants.MAIN_TOPIC, response);
+		simpMessagingTemplate.convertAndSendToUser(playerDto.getPlayerId(), Constants.MAIN_TOPIC, response);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
