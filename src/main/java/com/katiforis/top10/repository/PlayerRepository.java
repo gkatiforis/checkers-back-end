@@ -1,6 +1,8 @@
 package com.katiforis.top10.repository;
 
 import com.katiforis.top10.model.Player;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +11,5 @@ public interface PlayerRepository extends CrudRepository<Player, Long> {
     Player findById(Long i);
     Player findByPlayerId(String id);
     Player save(Player player);
+    Page<Player> findAllByOrderByPlayerDetails_EloDesc(Pageable pageable);
 }

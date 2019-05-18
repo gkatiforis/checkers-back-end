@@ -46,6 +46,9 @@ public class GameServiceImpl implements GameService {
 	@Autowired
 	private GameCache gameCache;
 
+	@Autowired
+	private ModelMapper modelMapper;
+
 	@Override
 	public void findGame(FindGame findGame) {
 		log.debug("Start GameServiceImpl.findGame");
@@ -73,7 +76,6 @@ public class GameServiceImpl implements GameService {
 				Player player1 = playerQueue.get(0);
 				Player player2  = player;
 
-				ModelMapper modelMapper = new ModelMapper();
 				modelMapper.getConfiguration().setAmbiguityIgnored(true);
 				PlayerDto gamePlayerDto = 	modelMapper.map(player1, PlayerDto.class);
 				PlayerDto gamePlayerDto2 = 	modelMapper.map(player2, PlayerDto.class);
@@ -101,7 +103,6 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void checkAnswer(PlayerAnswer playerAnswerDTO) {
 		log.debug("Start GameServiceImpl.checkAnswer");
-		ModelMapper modelMapper = new ModelMapper();
 
 		GameState gameStateDTO = gameCache.getGame(playerAnswerDTO.getGameId());
 
@@ -176,7 +177,7 @@ public class GameServiceImpl implements GameService {
 
 			Runnable endGame  = () -> endGame(gameStateDTO.getGameId());
 			ScheduledExecutorService executorEndGame = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-			executorEndGame.schedule(endGame,  20 , TimeUnit.SECONDS);
+			executorEndGame.schedule(endGame,  60 * 5 , TimeUnit.SECONDS);
 
 //			Runnable sendCurrectTime  = () -> sendCurrentTime(newGame.getId());
 //			ScheduledExecutorService executorSendCurrectTime = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());

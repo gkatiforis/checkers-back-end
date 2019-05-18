@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RankList extends BaseResponse {
-    List<PlayerDto> playerDtos = new ArrayList<>();
+    List<PlayerDto> players = new ArrayList<>();
 
     public RankList(String status) {
         super(status);
@@ -20,11 +20,11 @@ public class RankList extends BaseResponse {
         super(gameId, status);
     }
 
-    public List<PlayerDto> getPlayerDtos() {
-        return playerDtos;
+    public List<PlayerDto> getPlayers() {
+        return players;
     }
 
-    public void setPlayerDtos(List<PlayerDto> playerDtos) {
-        this.playerDtos = playerDtos;
+    public void setPlayers(List<PlayerDto> players) {
+        this.players = players;
     }
 }
