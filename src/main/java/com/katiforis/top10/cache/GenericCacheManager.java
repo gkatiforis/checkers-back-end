@@ -46,6 +46,8 @@ public abstract class GenericCacheManager<K extends String, T extends Serializab
     protected void removeItem(K key){
         log.debug("Start GenericCacheManager.removeItem");
         caches.get(key).remove(key);
+        cacheManager.removeCache(key);
+        caches.remove(key);
         log.debug("Start GenericCacheManager.removeItem");
     }
 
