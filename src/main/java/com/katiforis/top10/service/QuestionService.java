@@ -1,4 +1,4 @@
-package com.katiforis.top10.services;
+package com.katiforis.top10.service;
 
 import com.katiforis.top10.DTO.PlayerAnswer;
 import com.katiforis.top10.model.Answer;
@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface QuestionHandler {
+public interface QuestionService {
 
     @Transactional
     List<Question> getQuestions();

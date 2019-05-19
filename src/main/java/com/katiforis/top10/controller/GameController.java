@@ -1,7 +1,7 @@
 package com.katiforis.top10.controller;
 
 import com.katiforis.top10.DTO.PlayerAnswer;
-import com.katiforis.top10.services.GameService;
+import com.katiforis.top10.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;

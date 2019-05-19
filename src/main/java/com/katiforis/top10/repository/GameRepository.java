@@ -1,9 +1,10 @@
-package com.katiforis.top10.cache;
+package com.katiforis.top10.repository;
 
 import com.katiforis.top10.DTO.PlayerDto;
 import com.katiforis.top10.DTO.PlayerAnswer;
 import com.katiforis.top10.DTO.response.GameState;
 import com.katiforis.top10.DTO.Question;
+import com.katiforis.top10.cache.GenericCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import static org.ehcache.config.units.MemoryUnit.MB;
 
 @Slf4j
 @Component
-public class GameCache extends GenericCacheManager<String, GameState> {
+public class GameRepository extends GenericCacheManager<String, GameState> {
 
     public boolean addAnswer(PlayerAnswer playerAnswerDTO){
         log.debug("Start GameCache.addAnswer");

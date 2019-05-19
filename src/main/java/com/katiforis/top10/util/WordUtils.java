@@ -1,5 +1,5 @@
 
-package com.katiforis.top10.services.impl;
+package com.katiforis.top10.util;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -7,8 +7,10 @@ import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 @Slf4j
-public class WordHandler {
+public class WordUtils {
     private static List<String> greekCh = Arrays.asList("ΑΙ", "ΕΙ", "Η", "ΟΙ", "Υ", "Ω");
+
+    private WordUtils(){}
 
     public static String convert(String word) {
         log.debug("Start WordHandler.convert");

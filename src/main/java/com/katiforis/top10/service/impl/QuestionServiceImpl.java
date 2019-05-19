@@ -1,10 +1,11 @@
-package com.katiforis.top10.services.impl;
+package com.katiforis.top10.service.impl;
 
 import com.katiforis.top10.DTO.PlayerAnswer;
 import com.katiforis.top10.model.Answer;
 import com.katiforis.top10.model.Question;
 import com.katiforis.top10.repository.QuestionRepository;
-import com.katiforis.top10.services.QuestionHandler;
+import com.katiforis.top10.service.QuestionService;
+import com.katiforis.top10.util.WordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class QuestionHandlerImpl implements QuestionHandler {
+public class QuestionServiceImpl implements QuestionService {
 
 	@Autowired
 	QuestionRepository questionRepository;
@@ -52,7 +53,7 @@ public class QuestionHandlerImpl implements QuestionHandler {
 	@Override
 	public Answer isAnswerValid(PlayerAnswer playerAnswerDTO) {
 		log.debug("Start QuestionHandlerImpl.isAnswerValid");
-		String[] answers = WordHandler.convert(playerAnswerDTO.getDescription()).split("\\|");
+		String[] answers = WordUtils.convert(playerAnswerDTO.getDescription()).split("\\|");
 
 
 		Question question = getQuestionById(playerAnswerDTO.getQuestionId());
@@ -117,7 +118,7 @@ public class QuestionHandlerImpl implements QuestionHandler {
 
 			for(Answer correctAnswer :correctAnswers){
 
-				String[] descriptionArray = WordHandler.convert(correctAnswer.getDescription().trim()).split("\\|");
+				String[] descriptionArray = WordUtils.convert(correctAnswer.getDescription().trim()).split("\\|");
 				for (String description : descriptionArray) {
 					description = description.replaceAll("\u200E", "").trim();
 					if(description.startsWith(mustBeginWith)){
@@ -171,7 +172,7 @@ public class QuestionHandlerImpl implements QuestionHandler {
 	private Answer getCorrect(List<Answer> correctAnswers, String answers) {
 		log.debug("Start QuestionHandlerImpl.getCorrect");
 		for (Answer correctAnswer : correctAnswers) {
-			String[] descriptionArray = WordHandler.convert(correctAnswer.getDescription().trim()).split("\\|");
+			String[] descriptionArray = WordUtils.convert(correctAnswer.getDescription().trim()).split("\\|");
 			for (String description : descriptionArray) {
 				description = description.replaceAll("\u200E", "").trim();
 
