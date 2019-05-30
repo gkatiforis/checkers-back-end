@@ -21,11 +21,11 @@ public class GameInvitation implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_player_id")
-    private Player from;
+    private User from;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_player_id")
-    private Player to;
+    private User to;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")

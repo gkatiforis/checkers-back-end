@@ -4,9 +4,9 @@ import com.katiforis.top10.DTO.*;
 import com.katiforis.top10.DTO.request.FindGame;
 import com.katiforis.top10.DTO.request.GetRank;
 import com.katiforis.top10.DTO.response.*;
-import com.katiforis.top10.model.Player;
+import com.katiforis.top10.model.User;
 import com.katiforis.top10.service.GameHandlerService;
-import com.katiforis.top10.service.PlayerService;
+import com.katiforis.top10.service.UserService;
 import com.katiforis.top10.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -16,8 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -32,31 +34,20 @@ public class MenuController {
     GameHandlerService gameHandlerService;
 
 	@Autowired
-	private PlayerService playerService;
+	private UserService userService;
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	@MessageMapping("/login")
-	ResponseEntity login(PlayerDto playerDto) {
-		log.debug("Start PlayerController.login");
-		Player player = playerService.login(playerDto.getPlayerId(), playerDto.getUsername());
-		Profile profile = new Profile();
-		profile.setUsername(player.getUsername());
-		ResponseEntity<Profile> response = new ResponseEntity<>(profile, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(player.getPlayerId(), Constants.MAIN_TOPIC, response);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
 	@MessageMapping("/rank")
 	ResponseEntity getRankList(GetRank get) {
 		log.debug("Start PlayerController.getRankList");
-		List<Player> players = playerService.getPlayers(0, 10);
+		Principal principal = SecurityContextHolder.getContext().getAuthentication();
+		List<User> users = userService.getPlayers(0, 10);
 		RankList rankList = new RankList();
-		rankList.setPlayers(modelMapper.map(players,  new TypeToken<List<PlayerDto>>(){}.getType()));
-		rankList.setUserId(get.getPlayerId());
+		rankList.setPlayers(modelMapper.map(users,  new TypeToken<List<UserDto>>(){}.getType()));
 		ResponseEntity<RankList> response = new ResponseEntity<>(rankList, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(get.getPlayerId(), Constants.MAIN_TOPIC, response);
+		simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
@@ -66,4 +57,18 @@ public class MenuController {
 		gameHandlerService.findGame(findGame);
 		log.debug("End GameController.findGame");
 	}
+
+	@MessageMapping("/details")
+	public void getPlayerDetails() {
+		log.debug("Start GameController.getPlayerDetails");
+		Principal principal = SecurityContextHolder.getContext().getAuthentication();
+		User user = userService.getUser(principal.getName());
+		UserDto userDto =  modelMapper.map(user,  UserDto.class);
+		UserStats userStats = new UserStats();
+		userStats.setUserDto(userDto);
+		ResponseEntity<UserStats> response = new ResponseEntity<>(userStats, HttpStatus.OK);
+		simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
+		log.debug("End GameController.getPlayerDetails");
+	}
 }
+

@@ -7,9 +7,9 @@ import com.katiforis.top10.DTO.response.GameState;
 import com.katiforis.top10.DTO.response.GameStats;
 import com.katiforis.top10.DTO.response.Start;
 import com.katiforis.top10.repository.GameRepository;
-import com.katiforis.top10.model.Player;
+import com.katiforis.top10.model.User;
 import com.katiforis.top10.model.PlayerDetails;
-import com.katiforis.top10.repository.PlayerRepository;
+import com.katiforis.top10.repository.UserRepository;
 import com.katiforis.top10.service.GameHandlerService;
 import com.katiforis.top10.service.QuestionService;
 import com.katiforis.top10.util.Constants;
@@ -20,8 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,10 +36,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class GameHandlerServiceImpl implements GameHandlerService {
 
-	private static List<Player> playerQueue = new ArrayList();
+	private static List<User> userQueue = new ArrayList();
 
 	@Autowired
-	private PlayerRepository playerRepository;
+	private UserRepository userRepository;
 
 	@Autowired
 	private GameRepository gameRepository;
@@ -56,12 +58,13 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 		log.debug("Start GameHandlerServiceImpl.findGame");
 		ResponseEntity<GameResponse> response;
 
-		String userId = findGame.getPlayerId();
+        Principal principal = SecurityContextHolder.getContext().getAuthentication();
+		String userId = principal.getName();
 
-		Player player = playerRepository.findByPlayerId(userId);
+		User user = userRepository.findByUserId(userId);
 
 
-		if (playerQueue.contains(player)) {
+		if (userQueue.contains(user)) {
 			return;
 		}
 
@@ -74,27 +77,27 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 			return;
 
 		} else {
-			if (!playerQueue.isEmpty()) {//create new
-				Player player1 = playerQueue.get(0);
-				Player player2 = player;
+			if (!userQueue.isEmpty()) {//create new
+				User user1 = userQueue.get(0);
+				User user2 = user;
 
 				modelMapper.getConfiguration().setAmbiguityIgnored(true);
-				PlayerDto gamePlayerDto = modelMapper.map(player1, PlayerDto.class);
-				PlayerDto gamePlayerDto2 = modelMapper.map(player2, PlayerDto.class);
-				List<PlayerDto> playerDtos = new ArrayList<>();
-				playerDtos.add(gamePlayerDto);
-				playerDtos.add(gamePlayerDto2);
+				UserDto gameUserDto = modelMapper.map(user1, UserDto.class);
+				UserDto gameUserDto2 = modelMapper.map(user2, UserDto.class);
+				List<UserDto> playerDtos = new ArrayList<>();
+				playerDtos.add(gameUserDto);
+				playerDtos.add(gameUserDto2);
 
 				GameState newGame = createNewGame(playerDtos);
 				Start startDTO = new Start(String.valueOf(newGame.getGameId()));
 				response = new ResponseEntity<>(startDTO, HttpStatus.OK);
 				simpMessagingTemplate.convertAndSendToUser(String.valueOf(userId), Constants.MAIN_TOPIC, response);
-				simpMessagingTemplate.convertAndSendToUser(String.valueOf(player1.getPlayerId()), Constants.MAIN_TOPIC, response);
-				playerQueue.clear();
+				simpMessagingTemplate.convertAndSendToUser(String.valueOf(user1.getUserId()), Constants.MAIN_TOPIC, response);
+				userQueue.clear();
 			} else {
 
-				if (!playerQueue.contains(userId)) {
-					playerQueue.add(player);
+				if (!userQueue.contains(userId)) {
+					userQueue.add(user);
 				}
 
 			}
@@ -102,7 +105,7 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 		log.debug("End GameHandlerServiceImpl.findGame");
 	}
 
-	public GameState createNewGame(List<PlayerDto> playerDtos) {
+	public GameState createNewGame(List<UserDto> playerDtos) {
 		log.debug("Start GameHandlerServiceImpl.createNewGame");
 
 		GameState gameStateDTO = new GameState(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
@@ -143,15 +146,15 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
 		GameStats gameStats = new GameStats(gameId);
 
-		List<PlayerDto> playerDtos = gameState.getPlayers();
+		List<UserDto> playerDtos = gameState.getPlayers();
 
 		//save data
-		for(PlayerDto playerDto:playerDtos){
-			Player player = playerRepository.findByPlayerId(playerDto.getPlayerId());
-			PlayerDetails playerDetails = player.getPlayerDetails();
+		for(UserDto playerDto:playerDtos){
+			User user = userRepository.findByUserId(playerDto.getUserId());
+			PlayerDetails playerDetails = user.getPlayerDetails();
 			PlayerDetailsDto playerDetailsDto = playerDto.getPlayerDetails();
 			playerDetails.setElo(playerDetails.getElo() + playerDetailsDto.getEloExtra());
-			playerRepository.save(player);
+			userRepository.save(user);
 		}
 
 		playerDtos.sort((p1, p2)->

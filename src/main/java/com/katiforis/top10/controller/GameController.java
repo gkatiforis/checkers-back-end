@@ -25,18 +25,16 @@ public class GameController {
 	}
 
 	@MessageMapping("/gamestate")
-	public void getGameState(String userId) {
+	public void getGameState(String gameId) {
 		log.debug("Start GameController.getGameState");
-		String [] ids = userId.split("\\|");
-			gameService.getGameState(ids[0], ids[1]);
+			gameService.getGameState(gameId);
 		log.debug("End GameController.getGameState");
 	}
 
 	@MessageMapping("/chat/help/getLetter")
-	public void getLetter(String userId) {
+	public void getLetter(String gameId) {
 		log.debug("Start GameController.getLetter");
-		String [] ids = userId.split("\\|");
-			gameService.getGameState(ids[0], ids[1]);
+			gameService.getGameState(gameId);
 		log.debug("End GameController.getLetter");
 	}
 }

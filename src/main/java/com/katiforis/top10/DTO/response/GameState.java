@@ -1,6 +1,6 @@
 package com.katiforis.top10.DTO.response;
 
-import com.katiforis.top10.DTO.PlayerDto;
+import com.katiforis.top10.DTO.UserDto;
 import com.katiforis.top10.DTO.Question;
 import lombok.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class GameState extends GameResponse {
-    private List<PlayerDto> players;
+    private List<UserDto> players;
     private List<Question> questions;
     private Date dateStarted;
     private Date currentDate;

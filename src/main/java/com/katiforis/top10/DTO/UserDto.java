@@ -7,19 +7,20 @@ import java.io.Serializable;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode
 @ToString
-public class User implements Serializable {
+public class UserDto implements Serializable {
     private long id;
+    private String userId;
     private String username;
+    private String email;
     private String imageUrl;
+    private PlayerDetailsDto playerDetails;
 
-    public User(String username) {
+    public UserDto(String username) {
         this.username = username;
     }
 
-
-    public User(long id, String username, String imageUrl) {
+    public UserDto(long id, String username, String imageUrl) {
         this.id = id;
         this.username = username;
         this.imageUrl = imageUrl;

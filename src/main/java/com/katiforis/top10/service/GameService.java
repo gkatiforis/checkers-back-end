@@ -4,7 +4,7 @@ import com.katiforis.top10.DTO.PlayerAnswer;
 
 public interface GameService {
 
-    void getGameState(String userId, String gameId);
+    void getGameState(String gameId);
 
     void checkAnswer(PlayerAnswer playerAnswerDTO);
 }

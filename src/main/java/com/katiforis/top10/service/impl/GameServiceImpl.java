@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.*;
 
 @Slf4j
@@ -36,6 +38,8 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void checkAnswer(PlayerAnswer playerAnswerDTO) {
 		log.debug("Start GameServiceImpl.checkAnswer");
+		Principal principal = SecurityContextHolder.getContext().getAuthentication();
+		playerAnswerDTO.setUserId(principal.getName());
 
 		GameState gameStateDTO = gameRepository.getGame(playerAnswerDTO.getGameId());
 
@@ -91,17 +95,18 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void getGameState(String userId, String gameId){
+	public void getGameState(String gameId){
 		log.debug("Start GameServiceImpl.getGameState");
+		Principal principal = SecurityContextHolder.getContext().getAuthentication();
+
 		gameId = gameId.replace("\n", "").replace("\r", "");
-		userId = userId.replace("\n", "").replace("\r", "");
 
 		GameState gameStateDTO = gameRepository.getGame(gameId);
 		Date now = new Date();
 		gameStateDTO.setCurrentDate(now);
 
 		ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
+		simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
 
 		log.debug("End GameServiceImpl.getGameState");
 

@@ -31,5 +31,5 @@ public class PlayerDetails implements Serializable {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    private Player player;
+    private User user;
 }

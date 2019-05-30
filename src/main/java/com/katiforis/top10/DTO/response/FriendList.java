@@ -1,6 +1,6 @@
 package com.katiforis.top10.DTO.response;
 
-import com.katiforis.top10.model.Player;
+import com.katiforis.top10.model.User;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class FriendList extends BaseResponse {
-    List<Player> players = new ArrayList<>();
+    List<User> users = new ArrayList<>();
     public FriendList(String status) {
         super(status);
     }

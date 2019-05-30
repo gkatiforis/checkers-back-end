@@ -10,13 +10,13 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 	@Override
-	public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
-		stompEndpointRegistry.addEndpoint("/im").addInterceptors(new HandshakeInterceptor()).withSockJS();
+	public void configureMessageBroker(final MessageBrokerRegistry config) {
+		config.enableSimpleBroker("/user" , "/main", "/game/group/");
+		config.setUserDestinationPrefix("/user");
 	}
 
 	@Override
-	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.enableSimpleBroker("/b", "/g", "/user");
-		registry.setUserDestinationPrefix("/user");
+	public void registerStompEndpoints(final StompEndpointRegistry registry) {
+		registry.addEndpoint("/top").addInterceptors(new HandshakeInterceptor()).withSockJS();
 	}
 }

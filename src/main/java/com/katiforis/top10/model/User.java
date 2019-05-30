@@ -6,27 +6,36 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode
 @ToString
 @Entity
-@Table(name= "player")
-public class Player implements Serializable {
+@Table(name= "user")
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
-    @Column(name = "player_id")
-    private String playerId;
-
     @Column(name = "username")
     private String username;
 
-    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "user_id")
+    private String userId;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "picture_url")
+    private String pictureUrl;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private PlayerDetails playerDetails;
 
     @OneToMany(mappedBy = "from", fetch = FetchType.LAZY)
@@ -44,12 +53,20 @@ public class Player implements Serializable {
     @OneToMany(mappedBy = "from", fetch = FetchType.LAZY)
     private List<ShareInvitation> shareInvitations = new ArrayList<>();
 
-    public Player(String username) {
+    public User(String username) {
         this.username = username;
     }
 
-    public Player(String playerId, String username) {
-        this.playerId = playerId;
-        this.username = username;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId.equals(user.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId);
     }
 }

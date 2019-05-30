@@ -21,11 +21,11 @@ public class FriendInvitation implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_player_id")
-    private Player from;
+    private User from;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_player_id")
-    private Player to;
+    private User to;
 
     @Column(name = "request_date")
     private Date requestDate;

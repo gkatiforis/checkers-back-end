@@ -44,14 +44,17 @@ CREATE TABLE answer (
 ALTER TABLE answer CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 ALTER TABLE question CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-CREATE TABLE player (
+CREATE TABLE user (
   id BIGINT PRIMARY KEY auto_increment,
-  player_id VARCHAR(200) NOT NULL UNIQUE,
-  username VARCHAR(200) NOT NULL UNIQUE
+  user_id VARCHAR(30) NOT NULL UNIQUE,
+  username VARCHAR(20) NOT NULL UNIQUE,
+  email VARCHAR(40),
+  name VARCHAR(80),
+  picture_url VARCHAR(200)
 );
 
 CREATE TABLE player_details (
-  player_id BIGINT PRIMARY KEY,
+  user_id BIGINT PRIMARY KEY,
   elo INT NOT NULL,
   level INT NOT NULL,
   level_points INT NOT NULL,
@@ -210,17 +213,6 @@ insert into answer(question_id, description, display_description,  points)values
   (6,  'κορμί|πατριώτη', 'Το χάσαμε το κορμί πατριώτη',  4),
   (6,  'Τρατζικ', 'Τρατζικ', 4),
   (6,  'καμπάνα', 'Σήμα καμπάνα',  4);
-
-insert into player( player_id, username)values
-(102611879418639905272,	'User1'),
-(112815880341047863213,	'User2'),
-(102611859418639905272,	'User3'),
-(102451879418639905272,	'User4'),
-(1026118329418639905272,	'User5'),
-(102981879418639905272,	'User6');
-insert into player_details(player_id,  coins, elo, level, level_points )values
-(1, 100,	1990, 40, 234),
-(2, 1000,	1690, 45, 2);
 
 SELECT  * from answer;
 SELECT  * from question;

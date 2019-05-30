@@ -1,6 +1,6 @@
 package com.katiforis.top10.service;
 
-import com.katiforis.top10.DTO.PlayerDto;
+import com.katiforis.top10.DTO.UserDto;
 import com.katiforis.top10.DTO.request.FindGame;
 import com.katiforis.top10.DTO.response.GameState;
 
@@ -10,7 +10,7 @@ public interface GameHandlerService {
 
     void findGame(FindGame findGame);
 
-    GameState createNewGame(List<PlayerDto> playerDtos);
+    GameState createNewGame(List<UserDto> playerDtos);
 
     void endGame(String gameId);
 }

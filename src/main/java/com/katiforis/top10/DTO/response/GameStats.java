@@ -1,6 +1,6 @@
 package com.katiforis.top10.DTO.response;
 
-import com.katiforis.top10.DTO.PlayerDto;
+import com.katiforis.top10.DTO.UserDto;
 import lombok.*;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 @ToString
 public class GameStats extends GameResponse {
 
-    List<PlayerDto> players;
+    List<UserDto> players;
 
     public GameStats(String gameId) {
         super(ResponseState.END_GAME.getState(), gameId);

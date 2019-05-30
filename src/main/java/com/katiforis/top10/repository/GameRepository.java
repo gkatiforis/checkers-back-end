@@ -1,6 +1,6 @@
 package com.katiforis.top10.repository;
 
-import com.katiforis.top10.DTO.PlayerDto;
+import com.katiforis.top10.DTO.UserDto;
 import com.katiforis.top10.DTO.PlayerAnswer;
 import com.katiforis.top10.DTO.response.GameState;
 import com.katiforis.top10.DTO.Question;
@@ -34,8 +34,8 @@ public class GameRepository extends GenericCacheManager<String, GameState> {
               playerAnswerDTOS = new HashSet<>();
             }
 
-            PlayerDto playerDto = gameStateDTO.getPlayers().stream()
-                    .filter(p -> p.getPlayerId().equals(playerAnswerDTO.getUserId()))
+            UserDto playerDto = gameStateDTO.getPlayers().stream()
+                    .filter(p -> p.getUserId().equals(playerAnswerDTO.getUserId()))
                     .findFirst().get();
             playerDto.getPlayerDetails().setEloExtra(playerDto.getPlayerDetails().getEloExtra() + playerAnswerDTO.getPoints());
             playerAnswerDTO.setPlayer(playerDto);
@@ -62,7 +62,7 @@ public class GameRepository extends GenericCacheManager<String, GameState> {
     public void addGame(GameState gameStateDTO){
         log.debug("Start GameCache.addGame");
        Cache<String, GameState> cache = cacheManager.createCache(gameStateDTO.getGameId(),
-                newCacheConfigurationBuilder(String.class, GameState.class, heap(10000).offheap(1000, MB)));
+                newCacheConfigurationBuilder(String.class, GameState.class, heap(10000).offheap(10, MB)));
         cache.put(gameStateDTO.getGameId(), gameStateDTO);
         caches.put(gameStateDTO.getGameId(), cache);
         log.debug("End GameCache.addGame");
