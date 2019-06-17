@@ -1,15 +1,18 @@
 package com.katiforis.checkers.repository;
 
 import com.katiforis.checkers.DTO.PlayerAnswer;
+import com.katiforis.checkers.DTO.UserDto;
 import com.katiforis.checkers.game.Board;
 import com.katiforis.checkers.game.Cell;
 import com.katiforis.checkers.game.Move;
 import com.katiforis.checkers.DTO.response.GameState;
 import com.katiforis.checkers.cache.GenericCacheManager;
+import com.katiforis.checkers.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.ehcache.config.builders.CacheConfigurationBuilder.newCacheConfigurationBuilder;
@@ -24,19 +27,36 @@ public class GameRepository extends GenericCacheManager<String, GameState> {
         log.debug("Start GameCache.addAnswer");
         synchronized (this.getCache(playerAnswerDTO.getGameId())) {
             GameState gameStateDTO = getGame(playerAnswerDTO.getGameId());
-
-
             Move move = playerAnswerDTO.getMove();
             Board board = gameStateDTO.getBoard();
+
+//            if(!board.isValidMove(move.getFrom(), move.getFrom())){
+//                return gameStateDTO;
+//            }
+
             boolean isCaptureMove = board.isCaptureMove(move.getFrom(), move.getTo());
             List<Cell> cells = board.movePiece(move.getFrom().getX(), move.getFrom().getY(), move.getTo().getX(), move.getTo().getY());
 
+            Date now = new Date();
+
+            UserDto currentPlayer = gameStateDTO.getPlayers().stream().filter(p -> p.getIsCurrent()).findFirst().get();
+            long remainingTime = currentPlayer.getSecondsRemaining() -
+                    Utils.getDiffInSeconds(gameStateDTO.getLastMoveDate(), now);
+            currentPlayer.setSecondsRemaining(remainingTime);
+            gameStateDTO.setLastMoveDate(now);
+            UserDto prevPlayer = currentPlayer;
+
             List<Move> moves = board.possibleMoves(cells);
             if(!isCaptureMove || moves.stream().noneMatch(Move::isObligatoryMove)){
-                if(gameStateDTO.getCurrentPlayer().equals(gameStateDTO.getPlayers().get(0))){
-                    gameStateDTO.setCurrentPlayer(gameStateDTO.getPlayers().get(1));
+                prevPlayer.setIsCurrent(false);
+                if(prevPlayer.equals(gameStateDTO.getPlayers().get(0))){
+                    gameStateDTO.getPlayers().set(0, prevPlayer);
+                    currentPlayer = gameStateDTO.getPlayers().get(1);
+                    currentPlayer.setIsCurrent(true);
                 }else{
-                    gameStateDTO.setCurrentPlayer(gameStateDTO.getPlayers().get(0));
+                    gameStateDTO.getPlayers().set(1, prevPlayer);
+                    currentPlayer = gameStateDTO.getPlayers().get(0);
+                    currentPlayer.setIsCurrent(true);
                 }
             }
 

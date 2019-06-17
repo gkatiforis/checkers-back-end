@@ -17,6 +17,9 @@ public class UserDto implements Serializable {
     private String imageUrl;
     private PlayerDetailsDto playerDetails;
     private String color;
+    private Long secondsRemaining;
+    private Boolean isCurrent;
+
     public UserDto(String username) {
         this.username = username;
     }

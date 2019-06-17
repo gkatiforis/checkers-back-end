@@ -14,18 +14,28 @@ import java.util.List;
 public class GameState extends GameResponse {
     private int gameStatus;
     private List<UserDto> players;
-    private UserDto currentPlayer;
     private Board board;
     private Date dateStarted;
     private Date currentDate;
+    private Date lastMoveDate;
+    private Integer gameMaxTime;
 
     public GameState(String gameId) {
             super(ResponseState.GAME_STATE.getState(), gameId);
     }
 
+
     public static class Status {
         public static final int PLAYERS_SELECTION = 1;
         public static final int IN_PROGRESS = 2;
         public static final int TERMINATED = 3;
+    }
+
+    public UserDto getCurrentPlayer(){
+        if(players.get(0).getIsCurrent()){
+            return players.get(0);
+        }else{
+            return players.get(1);
+        }
     }
 }

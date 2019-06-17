@@ -2,6 +2,7 @@ package com.katiforis.checkers.game;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -72,6 +73,10 @@ public class Board implements Serializable {
         else if(capturedPiece.getColor().equals(Piece.DARK)){
             capturedPiece.getCell().placePiece(null);
         }
+    }
+
+    public List<Move> possibleMoves(Cell cell)  {
+        return possibleMoves(Arrays.asList(cell));
     }
 
     public List<Move> possibleMoves(List<Cell> cells)  {
@@ -276,5 +281,15 @@ public class Board implements Serializable {
 
     public void setBoard(Cell[][] board) {
         this.board = board;
+    }
+
+    public boolean isValidMove(Cell srcCell, Cell dstCell){
+        List<Move> moves = possibleMoves(srcCell);
+        for(Move move:moves){
+            if(move.getTo().equals(dstCell)){
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,6 +1,7 @@
 package com.katiforis.checkers.controller;
 
 import com.katiforis.checkers.DTO.PlayerAnswer;
+import com.katiforis.checkers.service.GameHandlerService;
 import com.katiforis.checkers.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class GameController {
 	@Autowired
 	GameService gameService;
 
+	@Autowired
+	GameHandlerService gameHandlerService;
+
 	@MessageMapping("/group/word/{gameId}")
 	public void checkAnswer(@DestinationVariable String gameId, PlayerAnswer playerAnswerDTO) {
 		log.debug("Start GameController.checkAnswer");
@@ -27,14 +31,7 @@ public class GameController {
 	@MessageMapping("/gamestate")
 	public void getGameState(String gameId) {
 		log.debug("Start GameController.getGameState");
-			gameService.getGameState(gameId);
+		gameHandlerService.getGameState(gameId);
 		log.debug("End GameController.getGameState");
-	}
-
-	@MessageMapping("/chat/help/getLetter")
-	public void getLetter(String gameId) {
-		log.debug("Start GameController.getLetter");
-			gameService.getGameState(gameId);
-		log.debug("End GameController.getLetter");
 	}
 }

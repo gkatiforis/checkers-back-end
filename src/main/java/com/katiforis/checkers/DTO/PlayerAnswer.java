@@ -5,6 +5,8 @@ import com.katiforis.checkers.DTO.response.GameResponse;
 import com.katiforis.checkers.DTO.response.ResponseState;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -15,7 +17,7 @@ public class PlayerAnswer extends GameResponse {
     private boolean isCorrect = false;
     private UserDto player;
     private Move move;
-    private UserDto currentPlayer;
+    private List<UserDto> players;
 
     public PlayerAnswer(String status, String gameId) {
         super(status, gameId);

@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class Piece implements Serializable {
 
 	private String color;
-	private boolean isKing;
+	private boolean king;
 	@JsonIgnore
 	private Cell cell;
 
@@ -17,7 +17,7 @@ public class Piece implements Serializable {
 
 	public Piece(String color) throws IllegalArgumentException {
 		this.color = color;
-		this.isKing = false;
+		this.king = false;
 		this.cell = null;
 	}
 
@@ -25,12 +25,8 @@ public class Piece implements Serializable {
 		return this.color;
 	}
 
-	public boolean isKing(){
-		return this.isKing;
-	}
-
 	public void makeKing(){
-		this.isKing = true;
+		this.king = true;
 	}
 
 	public static String getOpponentColor(String givenColor){
@@ -53,7 +49,7 @@ public class Piece implements Serializable {
 
 		Piece givenPiece =  (Piece) obj;
 
-		if(givenPiece.getColor().equals(this.color) && givenPiece.isKing() == this.isKing &&
+		if(givenPiece.getColor().equals(this.color) && givenPiece.isKing() == this.king &&
 				givenPiece.getCell().getX() == this.cell.getX() && givenPiece.getCell().getY() == this.cell.getY()){
 			return true;
 		}
@@ -64,8 +60,12 @@ public class Piece implements Serializable {
 		this.color = color;
 	}
 
+	public boolean isKing() {
+		return king;
+	}
+
 	public void setKing(boolean king) {
-		isKing = king;
+		this.king = king;
 	}
 
 	public Cell getCell() {

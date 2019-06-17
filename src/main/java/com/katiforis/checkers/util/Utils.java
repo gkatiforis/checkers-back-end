@@ -1,6 +1,7 @@
 package com.katiforis.checkers.util;
 
 import java.security.SecureRandom;
+import java.util.Date;
 
 public class Utils {
 
@@ -11,5 +12,11 @@ public class Utils {
         for( int i = 0; i < len; i++ )
             sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
         return sb.toString();
+    }
+
+    public static long getDiffInSeconds(Date d1, Date d2){
+        long diff = d2.getTime() - d1.getTime();
+        long diffSeconds = diff / 1000 % 60;
+        return diffSeconds;
     }
 }

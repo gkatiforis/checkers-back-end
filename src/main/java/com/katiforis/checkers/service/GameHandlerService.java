@@ -13,4 +13,8 @@ public interface GameHandlerService {
     GameState createNewGame(List<UserDto> playerDtos);
 
     void endGame(String gameId);
+
+    void updateEndGameTime(String gameId, long timeSeconds);
+
+    void getGameState(String gameId);
 }
