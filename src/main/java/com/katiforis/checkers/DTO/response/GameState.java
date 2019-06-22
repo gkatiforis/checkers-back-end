@@ -19,6 +19,9 @@ public class GameState extends GameResponse {
     private Date currentDate;
     private Date lastMoveDate;
     private Integer gameMaxTime;
+    private String resignUserId;
+    private String offerDrawUserId;
+    private boolean draw;
 
     public GameState(String gameId) {
             super(ResponseState.GAME_STATE.getState(), gameId);

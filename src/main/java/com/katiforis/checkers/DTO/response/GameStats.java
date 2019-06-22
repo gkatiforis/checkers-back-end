@@ -11,9 +11,9 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class GameStats extends GameResponse {
-
-    List<UserDto> players;
-
+    private String winnerColor;
+    private List<UserDto> players;
+    private boolean draw;
     public GameStats(String gameId) {
         super(ResponseState.END_GAME.getState(), gameId);
     }

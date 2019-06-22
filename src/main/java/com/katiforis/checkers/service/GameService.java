@@ -4,6 +4,10 @@ import com.katiforis.checkers.DTO.PlayerAnswer;
 
 public interface GameService {
 
-    void checkAnswer(PlayerAnswer playerAnswerDTO);
+    void checkMove(PlayerAnswer playerAnswerDTO);
+
+    void resign(PlayerAnswer playerAnswerDTO);
+
+    void offerDraw(PlayerAnswer playerAnswerDTO);
 }
 

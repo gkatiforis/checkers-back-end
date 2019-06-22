@@ -20,12 +20,19 @@ public class GameController {
 	@Autowired
 	GameHandlerService gameHandlerService;
 
-	@MessageMapping("/group/word/{gameId}")
-	public void checkAnswer(@DestinationVariable String gameId, PlayerAnswer playerAnswerDTO) {
-		log.debug("Start GameController.checkAnswer");
+	@MessageMapping("/group/game/{gameId}")
+	public void gameTopic(@DestinationVariable String gameId, PlayerAnswer playerAnswerDTO) {
+		log.debug("Start GameController.gameTopic");
 			playerAnswerDTO.setGameId(gameId);
-			gameService.checkAnswer(playerAnswerDTO);
-		log.debug("End GameController.checkAnswer");
+
+			if( playerAnswerDTO.getResign()){
+				gameService.resign(playerAnswerDTO);
+			}else if( playerAnswerDTO.getOfferDraw()){
+				gameService.offerDraw(playerAnswerDTO);
+			}else{
+				gameService.checkMove(playerAnswerDTO);
+			}
+		log.debug("End GameController.gameTopic");
 	}
 
 	@MessageMapping("/gamestate")

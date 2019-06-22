@@ -1,5 +1,7 @@
 package com.katiforis.checkers.game;
 
+import com.katiforis.checkers.DTO.UserDto;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,6 +265,15 @@ public class Board implements Serializable {
         return !hasMoves(Piece.LIGHT) || !hasMoves(Piece.DARK);
     }
 
+    public String getLoser(){
+        if(!hasMoves(Piece.DARK)){
+            return Piece.DARK;
+        } else if(!hasMoves(Piece.LIGHT)){
+            return Piece.LIGHT;
+        }
+        return null;
+    }
+
     public List<Cell> getCellPieces(String givenColor)  {
         List<Cell> pieces = new ArrayList<>(12);
         for(int i=0; i < Board.BOARD_SIZE; i++) {
@@ -284,6 +295,7 @@ public class Board implements Serializable {
     }
 
     public boolean isValidMove(Cell srcCell, Cell dstCell){
+        srcCell = getCell(srcCell.getX(), srcCell.getY());
         List<Move> moves = possibleMoves(srcCell);
         for(Move move:moves){
             if(move.getTo().equals(dstCell)){

@@ -31,8 +31,8 @@ public class GameServiceImpl implements GameService {
 	private SimpMessagingTemplate simpMessagingTemplate;
 
 	@Override
-	public void checkAnswer(PlayerAnswer playerAnswerDTO) {
-		log.debug("Start GameServiceImpl.checkAnswer");
+	public void checkMove(PlayerAnswer playerAnswerDTO) {
+		log.debug("Start GameServiceImpl.checkMove");
 		Principal principal = SecurityContextHolder.getContext().getAuthentication();
 		playerAnswerDTO.setUserId(principal.getName());
 
@@ -45,8 +45,8 @@ public class GameServiceImpl implements GameService {
 		gameStateDTO = gameRepository.addAnswer(playerAnswerDTO);
 
 		gameHandlerService.updateEndGameTime(gameStateDTO.getGameId(), gameStateDTO.getCurrentPlayer().getSecondsRemaining());
-		ResponseEntity<GameResponse> response = null;
 
+		ResponseEntity<GameResponse> response = null;
 		if(gameStateDTO.getGameStatus() == GameState.Status.TERMINATED){
 			gameHandlerService.endGame(gameStateDTO.getGameId());
 		}else{
@@ -54,7 +54,32 @@ public class GameServiceImpl implements GameService {
 			 response = new ResponseEntity<>(playerAnswerDTO, HttpStatus.OK);
 		}
 		simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameStateDTO.getGameId(), response);
-		log.debug("End GameServiceImpl.checkAnswer");
+		log.debug("End GameServiceImpl.checkMove");
+	}
 
+	@Override
+	public void resign(PlayerAnswer playerAnswerDTO) {
+		Principal principal = SecurityContextHolder.getContext().getAuthentication();
+		playerAnswerDTO.setUserId(principal.getName());
+		GameState gameState = gameRepository.getGame(playerAnswerDTO.getGameId());
+        gameState.setResignUserId(playerAnswerDTO.getUserId());
+        gameRepository.updateGame(gameState);
+		gameHandlerService.endGame(playerAnswerDTO.getGameId());
+	}
+
+	@Override
+	public void offerDraw(PlayerAnswer playerAnswerDTO) {
+        Principal principal = SecurityContextHolder.getContext().getAuthentication();
+        playerAnswerDTO.setUserId(principal.getName());
+        GameState gameState = gameRepository.getGame(playerAnswerDTO.getGameId());
+
+        if(gameState.getOfferDrawUserId() != null && !gameState.getOfferDrawUserId().equals(playerAnswerDTO.getUserId())){
+            gameState.setDraw(true);
+            gameRepository.updateGame(gameState);
+            gameHandlerService.endGame(playerAnswerDTO.getGameId());
+        }else{
+            gameState.setOfferDrawUserId(playerAnswerDTO.getUserId());
+            gameRepository.updateGame(gameState);
+        }
 	}
 }
