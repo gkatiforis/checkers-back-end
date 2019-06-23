@@ -14,7 +14,7 @@ public class UserDto implements Serializable {
     private String userId;
     private String username;
     private String email;
-    private String imageUrl;
+    private String pictureUrl;
     private PlayerDetailsDto playerDetails;
     private String color;
     private Long secondsRemaining;
@@ -24,10 +24,10 @@ public class UserDto implements Serializable {
         this.username = username;
     }
 
-    public UserDto(long id, String username, String imageUrl) {
+    public UserDto(long id, String username, String pictureUrl) {
         this.id = id;
         this.username = username;
-        this.imageUrl = imageUrl;
+        this.pictureUrl = pictureUrl;
     }
 
     @Override

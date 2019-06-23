@@ -48,7 +48,8 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 	private ModelMapper modelMapper;
 
 	private ScheduledExecutorService scheduleExecutor;
-	private Map<String, ScheduledFuture<?>> tasks = new HashMap<>();
+	private Map<String, ScheduledFuture<?>> endGameTasks = new HashMap<>();
+    private Map<String, ScheduledFuture<?>> restartGameTasks = new HashMap<>();
 
 	@PostConstruct
 	public void init(){
@@ -82,7 +83,10 @@ public class GameHandlerServiceImpl implements GameHandlerService {
                 findGame.isRestart()) {
             modelMapper.getConfiguration().setAmbiguityIgnored(true);
             UserDto gameUserDto = modelMapper.map(user, UserDto.class);
-            gameRepository.addPlayer(gameStateDTO.getGameId(), gameUserDto);
+            GameState gameState = gameRepository.addPlayer(gameStateDTO.getGameId(), gameUserDto);
+               if(gameState.getPlayers().size() == 2){
+                   restartGame(gameStateDTO.getGameId());
+               }
         }
 		else {
 			if (!userQueue.isEmpty()) {//create new
@@ -133,7 +137,7 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         gameStateDTO.setGameStatus(GameState.Status.IN_PROGRESS);
         gameRepository.addGame(gameStateDTO);
 
-        tasks.put(gameStateDTO.getGameId(),
+        endGameTasks.put(gameStateDTO.getGameId(),
                 scheduleExecutor.schedule(() -> endGame(gameStateDTO.getGameId()),
                         gameStateDTO.getPlayers().get(0).getSecondsRemaining(),  TimeUnit.SECONDS));
 
@@ -142,24 +146,24 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 	}
 
 	public void updateEndGameTime(String gameId, long timeSeconds){
-		ScheduledFuture<?> scheduledFuture = tasks.get(gameId);
+		ScheduledFuture<?> scheduledFuture = endGameTasks.get(gameId);
 		if (scheduledFuture !=  null)
 		{
 			scheduledFuture.cancel(true);
 		}
 		scheduledFuture = scheduleExecutor.schedule(() -> endGame(gameId), timeSeconds,  TimeUnit.SECONDS);
-		tasks.put(gameId,scheduledFuture);
+		endGameTasks.put(gameId,scheduledFuture);
 	}
 
 
 	public void endGame(String gameId){
 		log.debug("Start GameHandlerServiceImpl.endGame");
-		ScheduledFuture<?> scheduledFuture = tasks.get(gameId);
+		ScheduledFuture<?> scheduledFuture = endGameTasks.get(gameId);
 		if (scheduledFuture !=  null)
 		{
 			scheduledFuture.cancel(true);
 		}
-		tasks.remove(gameId);
+		endGameTasks.remove(gameId);
 
 		GameState gameState = gameRepository.getGame(gameId);
 
@@ -204,19 +208,23 @@ public class GameHandlerServiceImpl implements GameHandlerService {
             gameStats.setDraw(true);
             gameStats.setPlayers(Arrays.asList(userDto, userDto2));
         }else{
+            int eloExtraLose = - 10;
             User loserUser = userRepository.findByUserId(loser.getUserId());
             PlayerDetails playerDetailsLoser = loserUser.getPlayerDetails();
-            int ratingLoser = playerDetailsLoser.getElo() - 10;
+            int ratingLoser = playerDetailsLoser.getElo() + eloExtraLose;
             playerDetailsLoser.setElo(ratingLoser);
             userRepository.save(loserUser);
-            loser.getPlayerDetails().setElo(ratingLoser);
+            loser.getPlayerDetails().setElo(playerDetailsLoser.getElo());
+            loser.getPlayerDetails().setEloExtra(eloExtraLose);
 
+            int eloExtraWin = + 10;
             User winnerUser = userRepository.findByUserId(winner.getUserId());
             PlayerDetails playerDetailsWinner = winnerUser.getPlayerDetails();
-            int ratingWinner = playerDetailsWinner.getElo() + 10;
+            int ratingWinner = playerDetailsWinner.getElo() + eloExtraWin;
             playerDetailsWinner.setElo(ratingWinner);
             userRepository.save(winnerUser);
-            winner.getPlayerDetails().setElo(ratingWinner);
+            winner.getPlayerDetails().setElo( playerDetailsWinner.getElo());
+            winner.getPlayerDetails().setEloExtra(eloExtraWin);
 
             gameStats.setWinnerColor(winner.getColor());
             gameStats.setPlayers(Arrays.asList(winner, loser));
@@ -260,12 +268,18 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         gameRepository.updateGame(gameStateDTO);
 
-        Runnable restartGame  = () -> restartGame(gameId);
-        ScheduledExecutorService executorEndGame = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-        executorEndGame.schedule(restartGame,  30 , TimeUnit.SECONDS);
+        restartGameTasks.put(gameId,
+                scheduleExecutor.schedule( () -> restartGame(gameId),
+                        30,  TimeUnit.SECONDS));
     }
 
     public void restartGame(String gameId){
+        ScheduledFuture<?> scheduledFuture = restartGameTasks.get(gameId);
+        if (scheduledFuture !=  null)
+        {
+            scheduledFuture.cancel(true);
+        }
+        restartGameTasks.remove(gameId);
         GameState gameStateDTO = gameRepository.getGame(gameId);
 
         if(gameStateDTO.getPlayers().size() != 2){
@@ -297,7 +311,7 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         gameRepository.startGame(gameId);
 
-        tasks.put(gameStateDTO.getGameId(),
+        endGameTasks.put(gameStateDTO.getGameId(),
                 scheduleExecutor.schedule(() -> endGame(gameStateDTO.getGameId()),
                         gameStateDTO.getPlayers().get(0).getSecondsRemaining(),  TimeUnit.SECONDS));
 

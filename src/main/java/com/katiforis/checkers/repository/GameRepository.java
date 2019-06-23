@@ -6,13 +6,12 @@ import com.katiforis.checkers.game.Board;
 import com.katiforis.checkers.game.Cell;
 import com.katiforis.checkers.game.Move;
 import com.katiforis.checkers.DTO.response.GameState;
-import com.katiforis.checkers.cache.GenericCacheManager;
+import com.katiforis.checkers.cache.CacheRepository;
 import com.katiforis.checkers.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +21,7 @@ import static org.ehcache.config.units.MemoryUnit.MB;
 
 @Slf4j
 @Component
-public class GameRepository extends GenericCacheManager<String, GameState> {
+public class GameRepository extends CacheRepository<String, GameState> {
 
     public GameState addAnswer(PlayerAnswer playerAnswerDTO) {
         log.debug("Start GameCache.addAnswer");
@@ -98,18 +97,16 @@ public class GameRepository extends GenericCacheManager<String, GameState> {
         return gameStateDTO;
     }
 
-    public void addPlayer(String gameId, UserDto userDto) {
+    public GameState addPlayer(String gameId, UserDto userDto) {
         log.debug("Start GameCache.addPlayer");
         synchronized (this.getCache(gameId)) {
             GameState gameStateDTO = getGame(gameId);
             if(!gameStateDTO.getPlayers().contains(userDto)){
-
                 gameStateDTO.getPlayers().add(userDto);
-                gameStateDTO.getPlayers().sort(Comparator.comparing(UserDto::getColor));
-
                 this.saveItem(gameId, gameStateDTO);
             }
             log.debug("End GameCache.addPlayer");
+            return gameStateDTO;
         }
     }
 

@@ -16,7 +16,7 @@ import static org.ehcache.config.builders.CacheManagerBuilder.newCacheManagerBui
 
 @Slf4j
 @Component
-public abstract class GenericCacheManager<K extends String, T extends Serializable> {
+public abstract class CacheRepository<K extends String, T extends Serializable> {
 
     protected CacheManager cacheManager;
     protected Map<String, Cache<K, T>> caches = new HashMap<>();
