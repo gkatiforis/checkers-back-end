@@ -208,23 +208,51 @@ public class GameHandlerServiceImpl implements GameHandlerService {
             gameStats.setDraw(true);
             gameStats.setPlayers(Arrays.asList(userDto, userDto2));
         }else{
-            int eloExtraLose = - 10;
+            int eloExtraLose = -5;
+            int pointsExtraLose = -10;
             User loserUser = userRepository.findByUserId(loser.getUserId());
             PlayerDetails playerDetailsLoser = loserUser.getPlayerDetails();
             int ratingLoser = playerDetailsLoser.getElo() + eloExtraLose;
-            playerDetailsLoser.setElo(ratingLoser);
+            int pointsLoser = playerDetailsLoser.getLevelPoints() + pointsExtraLose;
+            if(ratingLoser > 0){
+                playerDetailsLoser.setElo(ratingLoser);
+            }else{
+                playerDetailsLoser.setElo(0);
+            }
+            if(pointsLoser > 0){
+                playerDetailsLoser.setLevelPoints(pointsLoser);
+            }else{
+                playerDetailsLoser.setLevelPoints(0);
+            }
+
             userRepository.save(loserUser);
             loser.getPlayerDetails().setElo(playerDetailsLoser.getElo());
             loser.getPlayerDetails().setEloExtra(eloExtraLose);
+            loser.getPlayerDetails().setCoins(playerDetailsLoser.getCoins());
 
-            int eloExtraWin = + 10;
+            int eloExtraWin = 5;
+            int pointsExtraWin = 10;
+            int coinsExtraWin = 10;
             User winnerUser = userRepository.findByUserId(winner.getUserId());
             PlayerDetails playerDetailsWinner = winnerUser.getPlayerDetails();
             int ratingWinner = playerDetailsWinner.getElo() + eloExtraWin;
+            int pointsWinner = playerDetailsWinner.getLevelPoints() + pointsExtraWin;
+            int coinsWinner = playerDetailsWinner.getCoins() + coinsExtraWin;
+
             playerDetailsWinner.setElo(ratingWinner);
+            playerDetailsWinner.setLevelPoints(pointsWinner);
+            playerDetailsWinner.setCoins(coinsWinner);
+            int maxExp = playerDetailsWinner.getLevel() * 20;
+            if(pointsWinner >= maxExp){
+                playerDetailsWinner.setLevel(playerDetailsWinner.getLevel() + 1);
+                playerDetailsWinner.setLevelPoints(0);
+
+            }
             userRepository.save(winnerUser);
             winner.getPlayerDetails().setElo( playerDetailsWinner.getElo());
             winner.getPlayerDetails().setEloExtra(eloExtraWin);
+            winner.getPlayerDetails().setCoins(playerDetailsWinner.getCoins());
+            winner.getPlayerDetails().setCoinsExtra(coinsExtraWin);
 
             gameStats.setWinnerColor(winner.getColor());
             gameStats.setPlayers(Arrays.asList(winner, loser));

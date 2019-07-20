@@ -19,4 +19,6 @@ public interface UserService {
     User getGuestUser(String userId);
 
     List<User> getPlayers(int page, int size);
+
+    long getPlayerPosition(User user);
 }

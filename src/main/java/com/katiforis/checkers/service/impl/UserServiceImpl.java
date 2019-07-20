@@ -72,11 +72,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public List<User> getPlayers(int page, int size){
-		Page<User> players = userRepository.findAllByOrderByPlayerDetails_EloDesc(new PageRequest(0, 10));
+		Page<User> players = userRepository.findAllByOrderByPlayerDetails_EloDesc(new PageRequest(page, size));
 		return players.getContent();
 	}
 
-	public User getUser(String userId){
+    @Override
+    public long getPlayerPosition(User user) {
+	    return userRepository.countByPlayerDetailsElo(user.getPlayerDetails().getElo());
+    }
+
+    public User getUser(String userId){
 		return userRepository.findByUserId(userId);
 	}
 

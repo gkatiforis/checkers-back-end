@@ -41,10 +41,14 @@ public class MenuController {
 
 	@MessageMapping("/rank")
 	ResponseEntity getRankList(GetRank get) {
-		log.debug("Start PlayerController.getRankList");
+		log.debug("Start MenuController.getRankList");
 		Principal principal = SecurityContextHolder.getContext().getAuthentication();
-		List<User> users = userService.getPlayers(0, 10);
+        User currentUser = userService.getUser(principal.getName());
+		List<User> users = userService.getPlayers(0, 20);
+        long currentPlayerPosition = userService.getPlayerPosition(currentUser);
 		RankList rankList = new RankList();
+		rankList.setCurrentPlayerPosition(currentPlayerPosition + 1);
+        rankList.setCurrentPlayer(modelMapper.map(currentUser,  UserDto.class));
 		rankList.setPlayers(modelMapper.map(users,  new TypeToken<List<UserDto>>(){}.getType()));
 		ResponseEntity<RankList> response = new ResponseEntity<>(rankList, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
@@ -53,14 +57,14 @@ public class MenuController {
 
 	@MessageMapping("/game/find")
 	public void findGame(FindGame findGame) {
-		log.debug("Start GameController.findGame");
+		log.debug("Start MenuController.findGame");
 		gameHandlerService.findGame(findGame);
-		log.debug("End GameController.findGame");
+		log.debug("End MenuController.findGame");
 	}
 
 	@MessageMapping("/details")
 	public void getPlayerDetails() {
-		log.debug("Start GameController.getPlayerDetails");
+		log.debug("Start MenuController.getPlayerDetails");
 		Principal principal = SecurityContextHolder.getContext().getAuthentication();
 		User user = userService.getUser(principal.getName());
 		UserDto userDto =  modelMapper.map(user,  UserDto.class);
@@ -68,7 +72,14 @@ public class MenuController {
 		userStats.setUserDto(userDto);
 		ResponseEntity<UserStats> response = new ResponseEntity<>(userStats, HttpStatus.OK);
 		simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
-		log.debug("End GameController.getPlayerDetails");
+		log.debug("End MenuController.getPlayerDetails");
 	}
+
+    @MessageMapping("/keepConnection")
+    public void keepConnection() {
+        log.debug("Start MenuController.keepConnection");
+
+        log.debug("End MenuController.keepConnection");
+    }
 }
 

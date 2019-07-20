@@ -8,6 +8,8 @@ import java.util.List;
 
 public class RankList extends BaseResponse {
     List<UserDto> players = new ArrayList<>();
+    UserDto currentPlayer;
+    long currentPlayerPosition;
 
     public RankList(String status) {
         super(status);
@@ -26,5 +28,21 @@ public class RankList extends BaseResponse {
 
     public void setPlayers(List<UserDto> players) {
         this.players = players;
+    }
+
+    public UserDto getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public void setCurrentPlayer(UserDto currentPlayer) {
+        this.currentPlayer = currentPlayer;
+    }
+
+    public void setCurrentPlayerPosition(long currentPlayerPosition) {
+        this.currentPlayerPosition = currentPlayerPosition;
+    }
+
+    public long getCurrentPlayerPosition() {
+        return currentPlayerPosition;
     }
 }

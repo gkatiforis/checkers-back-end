@@ -3,6 +3,7 @@ package com.katiforis.checkers.service.impl;
 import com.katiforis.checkers.DTO.*;
 import com.katiforis.checkers.DTO.response.GameResponse;
 import com.katiforis.checkers.DTO.response.GameState;
+import com.katiforis.checkers.DTO.response.OfferDraw;
 import com.katiforis.checkers.repository.GameRepository;
 import com.katiforis.checkers.service.GameHandlerService;
 import com.katiforis.checkers.service.GameService;
@@ -80,6 +81,10 @@ public class GameServiceImpl implements GameService {
         }else{
             gameState.setOfferDrawUserId(playerAnswerDTO.getUserId());
             gameRepository.updateGame(gameState);
+            OfferDraw offerDraw = new OfferDraw(playerAnswerDTO.getGameId());
+            offerDraw.setByUser(playerAnswerDTO.getUserId());
+            ResponseEntity<GameResponse> response = new ResponseEntity<>(offerDraw, HttpStatus.OK);
+            simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + playerAnswerDTO.getGameId(), response);
         }
 	}
 }

@@ -8,8 +8,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>Top 10</name>
-	<description>Top 10</description>
+	<name>Checkers</name>
+	<description>Checkers</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
