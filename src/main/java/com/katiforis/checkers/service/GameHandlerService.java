@@ -1,16 +1,23 @@
 package com.katiforis.checkers.service;
 
+import com.katiforis.checkers.DTO.GameType;
 import com.katiforis.checkers.DTO.UserDto;
 import com.katiforis.checkers.DTO.request.FindGame;
 import com.katiforis.checkers.DTO.response.GameState;
+import com.katiforis.checkers.exception.GameException;
+import com.katiforis.checkers.model.User;
 
 import java.util.List;
 
 public interface GameHandlerService {
 
-    void findGame(FindGame findGame);
+    void findGame(FindGame findGame) throws GameException;
 
-    GameState createNewGame(List<UserDto> playerDtos);
+    GameState createNewGame(List<UserDto> playerDtos, GameType gameType);
+
+    void payFee(List<UserDto> playerDtos, GameType gameType);
+
+    void checkFee(User user, GameType gameType) throws GameException;
 
     void endGame(String gameId);
 

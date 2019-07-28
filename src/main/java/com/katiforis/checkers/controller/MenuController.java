@@ -3,7 +3,9 @@ package com.katiforis.checkers.controller;
 import com.katiforis.checkers.DTO.*;
 import com.katiforis.checkers.DTO.request.FindGame;
 import com.katiforis.checkers.DTO.request.GetRank;
+import com.katiforis.checkers.DTO.request.Reward;
 import com.katiforis.checkers.DTO.response.*;
+import com.katiforis.checkers.exception.GameException;
 import com.katiforis.checkers.model.User;
 import com.katiforis.checkers.service.GameHandlerService;
 import com.katiforis.checkers.service.UserService;
@@ -55,11 +57,21 @@ public class MenuController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+    @MessageMapping("/reward")
+    ResponseEntity reward(Reward reward) {
+        log.debug("Start MenuController.reward");
+        userService.addReward(reward);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 	@MessageMapping("/game/find")
-	public void findGame(FindGame findGame) {
+	public ResponseEntity findGame(FindGame findGame) throws GameException {
 		log.debug("Start MenuController.findGame");
-		gameHandlerService.findGame(findGame);
-		log.debug("End MenuController.findGame");
+
+            gameHandlerService.findGame(findGame);
+
+        log.debug("End MenuController.findGame");
+        return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@MessageMapping("/details")

@@ -1,16 +1,18 @@
 package com.katiforis.checkers.service.impl;
 
-import com.katiforis.checkers.DTO.*;
-import com.katiforis.checkers.game.Board;
-import com.katiforis.checkers.game.Piece;
+import com.katiforis.checkers.DTO.GameType;
+import com.katiforis.checkers.DTO.UserDto;
 import com.katiforis.checkers.DTO.request.FindGame;
 import com.katiforis.checkers.DTO.response.GameResponse;
 import com.katiforis.checkers.DTO.response.GameState;
 import com.katiforis.checkers.DTO.response.GameStats;
 import com.katiforis.checkers.DTO.response.Start;
-import com.katiforis.checkers.repository.GameRepository;
-import com.katiforis.checkers.model.User;
+import com.katiforis.checkers.exception.GameException;
+import com.katiforis.checkers.game.Board;
+import com.katiforis.checkers.game.Piece;
 import com.katiforis.checkers.model.PlayerDetails;
+import com.katiforis.checkers.model.User;
+import com.katiforis.checkers.repository.GameRepository;
 import com.katiforis.checkers.repository.UserRepository;
 import com.katiforis.checkers.service.GameHandlerService;
 import com.katiforis.checkers.util.Constants;
@@ -32,103 +34,109 @@ import java.util.concurrent.*;
 @Service
 public class GameHandlerServiceImpl implements GameHandlerService {
 
-	private static final int MAX_CONCURRENTLY_GAMES = 10000;
-	private static List<User> userQueue = new ArrayList();
+    private static final int MAX_CONCURRENTLY_GAMES = 10000;
+    private static List<User> userQueue = new ArrayList();
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-	@Autowired
-	private GameRepository gameRepository;
+    @Autowired
+    private GameRepository gameRepository;
 
-	@Autowired
-	private SimpMessagingTemplate simpMessagingTemplate;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-	@Autowired
-	private ModelMapper modelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
-	private ScheduledExecutorService scheduleExecutor;
-	private Map<String, ScheduledFuture<?>> endGameTasks = new HashMap<>();
+    private ScheduledExecutorService scheduleExecutor;
+    private Map<String, ScheduledFuture<?>> endGameTasks = new HashMap<>();
     private Map<String, ScheduledFuture<?>> restartGameTasks = new HashMap<>();
 
-	@PostConstruct
-	public void init(){
-		scheduleExecutor = Executors.newScheduledThreadPool(MAX_CONCURRENTLY_GAMES);
-	}
+    @PostConstruct
+    public void init() {
+        scheduleExecutor = Executors.newScheduledThreadPool(MAX_CONCURRENTLY_GAMES);
+    }
 
-	@Override
-	public void findGame(FindGame findGame) {
-		log.debug("Start GameHandlerServiceImpl.findGame");
-		ResponseEntity<GameResponse> response;
+    @Override
+    public void findGame(FindGame findGame) throws GameException {
+        log.debug("Start GameHandlerServiceImpl.findGame");
+        ResponseEntity<GameResponse> response;
 
         Principal principal = SecurityContextHolder.getContext().getAuthentication();
-		String userId = principal.getName();
+        String userId = principal.getName();
 
-		User user = userRepository.findByUserId(userId);
+        User user = userRepository.findByUserId(userId);
 
 
-		if (userQueue.contains(user)) {
-			return;
-		}
+        if (userQueue.contains(user)) {
+            return;
+        }
 
-		GameState gameStateDTO = gameRepository.getGame(findGame.getGameId());
+        GameState gameStateDTO = gameRepository.getGame(findGame.getGameId());
 
-        if (gameStateDTO !=  null && gameStateDTO.getGameStatus() == GameState.Status.IN_PROGRESS) {
+        if (gameStateDTO != null && gameStateDTO.getGameStatus() == GameState.Status.IN_PROGRESS) {
             Start startDTO = new Start(findGame.getGameId());
             response = new ResponseEntity<>(startDTO, HttpStatus.OK);
             simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
             return;
-        }else if (gameStateDTO !=  null &&
+        } else if (gameStateDTO != null &&
                 gameStateDTO.getGameStatus() == GameState.Status.PLAYERS_SELECTION &&
                 findGame.isRestart()) {
             modelMapper.getConfiguration().setAmbiguityIgnored(true);
             UserDto gameUserDto = modelMapper.map(user, UserDto.class);
             GameState gameState = gameRepository.addPlayer(gameStateDTO.getGameId(), gameUserDto);
-               if(gameState.getPlayers().size() == 2){
-                   restartGame(gameStateDTO.getGameId());
-               }
-        }
-		else {
-			if (!userQueue.isEmpty()) {//create new
-				User user1 = userQueue.get(0);
-				User user2 = user;
+            if (gameState.getPlayers().size() == 2) {
+                restartGame(gameStateDTO.getGameId());
+            }
+        } else {
 
-				modelMapper.getConfiguration().setAmbiguityIgnored(true);
-				UserDto gameUserDto = modelMapper.map(user1, UserDto.class);
-				UserDto gameUserDto2 = modelMapper.map(user2, UserDto.class);
-				List<UserDto> playerDtos = new ArrayList<>();
+            checkFee(user, findGame.getGameType());
 
-				gameUserDto.setColor(Piece.DARK);
-				gameUserDto2.setColor(Piece.LIGHT);
-				gameUserDto2.setIsCurrent(true);
-				gameUserDto.setIsCurrent(false);
-				gameUserDto.setSecondsRemaining(10*60l);
-				gameUserDto2.setSecondsRemaining(10*60l);
-				playerDtos.add(gameUserDto);
-				playerDtos.add(gameUserDto2);
+            if (!userQueue.isEmpty()) {//create new
+                User user1 = userQueue.get(0);
+                User user2 = user;
+
+                modelMapper.getConfiguration().setAmbiguityIgnored(true);
+                UserDto gameUserDto = modelMapper.map(user1, UserDto.class);
+                UserDto gameUserDto2 = modelMapper.map(user2, UserDto.class);
+                List<UserDto> playerDtos = new ArrayList<>();
+
+
+                gameUserDto.setColor(Piece.DARK);
+                gameUserDto2.setColor(Piece.LIGHT);
+                gameUserDto2.setIsCurrent(true);
+                gameUserDto.setIsCurrent(false);
+                gameUserDto.setSecondsRemaining(10 * 60l);
+                gameUserDto2.setSecondsRemaining(10 * 60l);
+                playerDtos.add(gameUserDto);
+                playerDtos.add(gameUserDto2);
                 playerDtos.sort(Comparator.comparing(UserDto::getColor));
 
-				GameState newGame = createNewGame(playerDtos);
-				Start startDTO = new Start(String.valueOf(newGame.getGameId()));
-				response = new ResponseEntity<>(startDTO, HttpStatus.OK);
-				simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
-				simpMessagingTemplate.convertAndSendToUser(user1.getUserId(), Constants.MAIN_TOPIC, response);
-				userQueue.clear();
-			} else {
-			    userQueue.add(user);
-			}
-		}
-		log.debug("End GameHandlerServiceImpl.findGame");
-	}
+                payFee(playerDtos, findGame.getGameType());
 
-	public GameState createNewGame(List<UserDto> playerDtos) {
-		log.debug("Start GameHandlerServiceImpl.createNewGame");
+                GameState newGame = createNewGame(playerDtos, findGame.getGameType());
+                Start startDTO = new Start(String.valueOf(newGame.getGameId()));
+                response = new ResponseEntity<>(startDTO, HttpStatus.OK);
+                simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
+                simpMessagingTemplate.convertAndSendToUser(user1.getUserId(), Constants.MAIN_TOPIC, response);
+                userQueue.clear();
+            } else {
+                userQueue.add(user);
+            }
+        }
+        log.debug("End GameHandlerServiceImpl.findGame");
+    }
 
-		GameState gameStateDTO = new GameState(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
+    public GameState createNewGame(List<UserDto> playerDtos, GameType gameType) {
+        log.debug("Start GameHandlerServiceImpl.createNewGame");
+
+        GameState gameStateDTO = new GameState(String.valueOf(ThreadLocalRandom.current().nextInt(0, 1000000)));
         Board board = new Board();
         board.initialBoardSetup();
         gameStateDTO.setBoard(board);
         gameStateDTO.setPlayers(playerDtos);
+        gameStateDTO.setGameType(gameType);
         Date now = new Date();
         gameStateDTO.setCurrentDate(now);
         gameStateDTO.setDateStarted(now);
@@ -139,64 +147,77 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         endGameTasks.put(gameStateDTO.getGameId(),
                 scheduleExecutor.schedule(() -> endGame(gameStateDTO.getGameId()),
-                        gameStateDTO.getPlayers().get(0).getSecondsRemaining(),  TimeUnit.SECONDS));
+                        gameStateDTO.getPlayers().get(0).getSecondsRemaining(), TimeUnit.SECONDS));
 
-		log.debug("End GameHandlerServiceImpl.createNewGame");
-		return gameStateDTO;
-	}
+        log.debug("End GameHandlerServiceImpl.createNewGame");
+        return gameStateDTO;
+    }
 
-	public void updateEndGameTime(String gameId, long timeSeconds){
-		ScheduledFuture<?> scheduledFuture = endGameTasks.get(gameId);
-		if (scheduledFuture !=  null)
-		{
-			scheduledFuture.cancel(true);
-		}
-		scheduledFuture = scheduleExecutor.schedule(() -> endGame(gameId), timeSeconds,  TimeUnit.SECONDS);
-		endGameTasks.put(gameId,scheduledFuture);
-	}
+    public void payFee(List<UserDto> playerDtos, GameType gameType) {
+        if (gameType.getFee() > 0) {
+            for (UserDto u : playerDtos) {
+                User user = userRepository.findByUserId(u.getUserId());
+                user.getPlayerDetails().setCoins(user.getPlayerDetails().getCoins() - gameType.getFee());
+                userRepository.save(user);
+            }
+        }
+    }
 
+    public void checkFee(User user, GameType gameType) throws GameException {
+        if (gameType.getFee() > 0) {
+            if(user.getPlayerDetails().getCoins() < gameType.getFee()){
+                throw new GameException("Not enough fee");
+            }
+        }
+    }
 
-	public void endGame(String gameId){
-		log.debug("Start GameHandlerServiceImpl.endGame");
-		ScheduledFuture<?> scheduledFuture = endGameTasks.get(gameId);
-		if (scheduledFuture !=  null)
-		{
-			scheduledFuture.cancel(true);
-		}
-		endGameTasks.remove(gameId);
+    public void updateEndGameTime(String gameId, long timeSeconds) {
+        ScheduledFuture<?> scheduledFuture = endGameTasks.get(gameId);
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
+        }
+        scheduledFuture = scheduleExecutor.schedule(() -> endGame(gameId), timeSeconds, TimeUnit.SECONDS);
+        endGameTasks.put(gameId, scheduledFuture);
+    }
 
-		GameState gameState = gameRepository.getGame(gameId);
+    public void endGame(String gameId) {
+        log.debug("Start GameHandlerServiceImpl.endGame");
+        ScheduledFuture<?> scheduledFuture = endGameTasks.get(gameId);
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
+        }
+        endGameTasks.remove(gameId);
 
+        GameState gameState = gameRepository.getGame(gameId);
+
+        GameType gameType = gameState.getGameType();
         UserDto userDto = gameState.getPlayers().get(0);
         UserDto userDto2 = gameState.getPlayers().get(1);
         UserDto loser = null;
         UserDto winner = null;
 
-        if(gameState.isDraw()){
+        if (gameState.isDraw()) {
             winner = loser = null;
-        }
-       else if(gameState.getResignUserId() != null){
-            if(userDto.getUserId().equals(gameState.getResignUserId())){
+        } else if (gameState.getResignUserId() != null) {
+            if (userDto.getUserId().equals(gameState.getResignUserId())) {
                 loser = userDto;
                 winner = userDto2;
-            }else{
+            } else {
                 loser = userDto2;
                 winner = userDto;
             }
-        }else if(userDto.getIsCurrent()) {
+        } else if (userDto.getIsCurrent()) {
             loser = userDto;
             winner = userDto2;
-        }
-        else if(userDto2.getIsCurrent()){
+        } else if (userDto2.getIsCurrent()) {
             loser = userDto2;
             winner = userDto;
-        }
-        else if(gameState.getBoard().getLoser() != null){
+        } else if (gameState.getBoard().getLoser() != null) {
             String loserColor = gameState.getBoard().getLoser();
-            if(userDto.getColor().equals(loserColor)){
+            if (userDto.getColor().equals(loserColor)) {
                 loser = userDto;
                 winner = userDto2;
-            }else{
+            } else {
                 loser = userDto2;
                 winner = userDto;
             }
@@ -204,55 +225,53 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         GameStats gameStats = new GameStats(gameId);
 
-        if(loser == null && winner == null){
+        if (loser == null && winner == null) {
             gameStats.setDraw(true);
             gameStats.setPlayers(Arrays.asList(userDto, userDto2));
-        }else{
-            int eloExtraLose = -5;
-            int pointsExtraLose = -10;
+        } else {
             User loserUser = userRepository.findByUserId(loser.getUserId());
             PlayerDetails playerDetailsLoser = loserUser.getPlayerDetails();
-            int ratingLoser = playerDetailsLoser.getElo() + eloExtraLose;
-            int pointsLoser = playerDetailsLoser.getLevelPoints() + pointsExtraLose;
-            if(ratingLoser > 0){
+            int ratingLoser = playerDetailsLoser.getElo() + gameType.getEloExtraLose();
+            int pointsLoser = playerDetailsLoser.getLevelPoints() + gameType.getPointsExtraLose();
+            int coinsLoser = playerDetailsLoser.getCoins() + gameType.getCoinsExtraLoser();
+            if (ratingLoser > 0) {
                 playerDetailsLoser.setElo(ratingLoser);
-            }else{
+            } else {
                 playerDetailsLoser.setElo(0);
             }
-            if(pointsLoser > 0){
+            if (pointsLoser > 0) {
                 playerDetailsLoser.setLevelPoints(pointsLoser);
-            }else{
+            } else {
                 playerDetailsLoser.setLevelPoints(0);
             }
+            playerDetailsLoser.setCoins(coinsLoser);
 
             userRepository.save(loserUser);
             loser.getPlayerDetails().setElo(playerDetailsLoser.getElo());
-            loser.getPlayerDetails().setEloExtra(eloExtraLose);
+            loser.getPlayerDetails().setEloExtra(gameType.getEloExtraLose());
             loser.getPlayerDetails().setCoins(playerDetailsLoser.getCoins());
 
-            int eloExtraWin = 5;
-            int pointsExtraWin = 10;
-            int coinsExtraWin = 10;
+
             User winnerUser = userRepository.findByUserId(winner.getUserId());
             PlayerDetails playerDetailsWinner = winnerUser.getPlayerDetails();
-            int ratingWinner = playerDetailsWinner.getElo() + eloExtraWin;
-            int pointsWinner = playerDetailsWinner.getLevelPoints() + pointsExtraWin;
-            int coinsWinner = playerDetailsWinner.getCoins() + coinsExtraWin;
+            int ratingWinner = playerDetailsWinner.getElo() + gameType.getEloExtraWin();
+            int pointsWinner = playerDetailsWinner.getLevelPoints() + gameType.getPointsExtraWin();
+            int coinsWinner = playerDetailsWinner.getCoins() + gameType.getCoinsExtraWin();
 
             playerDetailsWinner.setElo(ratingWinner);
             playerDetailsWinner.setLevelPoints(pointsWinner);
             playerDetailsWinner.setCoins(coinsWinner);
             int maxExp = playerDetailsWinner.getLevel() * 20;
-            if(pointsWinner >= maxExp){
+            if (pointsWinner >= maxExp) {
                 playerDetailsWinner.setLevel(playerDetailsWinner.getLevel() + 1);
                 playerDetailsWinner.setLevelPoints(0);
 
             }
             userRepository.save(winnerUser);
-            winner.getPlayerDetails().setElo( playerDetailsWinner.getElo());
-            winner.getPlayerDetails().setEloExtra(eloExtraWin);
+            winner.getPlayerDetails().setElo(playerDetailsWinner.getElo());
+            winner.getPlayerDetails().setEloExtra(gameType.getEloExtraWin());
             winner.getPlayerDetails().setCoins(playerDetailsWinner.getCoins());
-            winner.getPlayerDetails().setCoinsExtra(coinsExtraWin);
+            winner.getPlayerDetails().setCoinsExtra(gameType.getCoinsExtraWin());
 
             gameStats.setWinnerColor(winner.getColor());
             gameStats.setPlayers(Arrays.asList(winner, loser));
@@ -264,28 +283,28 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         resetGame(gameId);
 
-		ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStats, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameId, response);
-		log.debug("End GameHandlerServiceImpl.endGame");
-	}
+        ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStats, HttpStatus.OK);
+        simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameId, response);
+        log.debug("End GameHandlerServiceImpl.endGame");
+    }
 
-	@Override
-	public void getGameState(String gameId){
-		log.debug("Start GameServiceImpl.getGameState");
-		Principal principal = SecurityContextHolder.getContext().getAuthentication();
+    @Override
+    public void getGameState(String gameId) {
+        log.debug("Start GameServiceImpl.getGameState");
+        Principal principal = SecurityContextHolder.getContext().getAuthentication();
 
-		gameId = gameId.replace("\n", "").replace("\r", "");
+        gameId = gameId.replace("\n", "").replace("\r", "");
 
-		GameState gameStateDTO = gameRepository.getGame(gameId);
-		Date now = new Date();
-		gameStateDTO.setCurrentDate(now);
-		ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
-		simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
+        GameState gameStateDTO = gameRepository.getGame(gameId);
+        Date now = new Date();
+        gameStateDTO.setCurrentDate(now);
+        ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
+        simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
 
-		log.debug("End GameServiceImpl.getGameState");
-	}
+        log.debug("End GameServiceImpl.getGameState");
+    }
 
-    public void resetGame(String gameId){
+    public void resetGame(String gameId) {
         GameState gameStateDTO = gameRepository.getGame(gameId);
 
         gameStateDTO.setDraw(false);
@@ -297,20 +316,19 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         gameRepository.updateGame(gameStateDTO);
 
         restartGameTasks.put(gameId,
-                scheduleExecutor.schedule( () -> restartGame(gameId),
-                        30,  TimeUnit.SECONDS));
+                scheduleExecutor.schedule(() -> restartGame(gameId),
+                        30, TimeUnit.SECONDS));
     }
 
-    public void restartGame(String gameId){
+    public void restartGame(String gameId) {
         ScheduledFuture<?> scheduledFuture = restartGameTasks.get(gameId);
-        if (scheduledFuture !=  null)
-        {
+        if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
         }
         restartGameTasks.remove(gameId);
         GameState gameStateDTO = gameRepository.getGame(gameId);
 
-        if(gameStateDTO.getPlayers().size() != 2){
+        if (gameStateDTO.getPlayers().size() != 2) {
             gameRepository.removeGame(gameId);
             return;
         }
@@ -325,8 +343,8 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         userDto2.setColor(Piece.LIGHT);
         userDto2.setIsCurrent(true);
         userDto.setIsCurrent(false);
-        userDto.setSecondsRemaining(10*60l);
-        userDto2.setSecondsRemaining(10*60l);
+        userDto.setSecondsRemaining(10 * 60l);
+        userDto2.setSecondsRemaining(10 * 60l);
 
         Date now = new Date();
         gameStateDTO.setCurrentDate(now);
@@ -341,11 +359,11 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         endGameTasks.put(gameStateDTO.getGameId(),
                 scheduleExecutor.schedule(() -> endGame(gameStateDTO.getGameId()),
-                        gameStateDTO.getPlayers().get(0).getSecondsRemaining(),  TimeUnit.SECONDS));
+                        gameStateDTO.getPlayers().get(0).getSecondsRemaining(), TimeUnit.SECONDS));
 
-        for(UserDto user:gameStateDTO.getPlayers()){
+        for (UserDto user : gameStateDTO.getPlayers()) {
             Start startDTO = new Start(gameId);
-            ResponseEntity<GameResponse>  response = new ResponseEntity<>(startDTO, HttpStatus.OK);
+            ResponseEntity<GameResponse> response = new ResponseEntity<>(startDTO, HttpStatus.OK);
             simpMessagingTemplate.convertAndSendToUser(user.getUserId(), Constants.MAIN_TOPIC, response);
         }
 

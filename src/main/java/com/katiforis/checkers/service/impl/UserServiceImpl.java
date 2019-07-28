@@ -1,6 +1,7 @@
 package com.katiforis.checkers.service.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.katiforis.checkers.DTO.request.Reward;
 import com.katiforis.checkers.model.PlayerDetails;
 import com.katiforis.checkers.model.User;
 import com.katiforis.checkers.repository.UserRepository;
@@ -9,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Random;
 
@@ -81,10 +84,21 @@ public class UserServiceImpl implements UserService {
 	    return userRepository.countByPlayerDetailsElo(user.getPlayerDetails().getElo());
     }
 
+    @Override
+    public void addReward(Reward reward) {
+        Principal principal = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = getUser(principal.getName());
+        int currentCoins = currentUser.getPlayerDetails().getCoins();
+        currentUser.getPlayerDetails().setCoins(currentCoins + reward.getAmount());
+        userRepository.save(currentUser);
+    }
+
+    @Override
     public User getUser(String userId){
 		return userRepository.findByUserId(userId);
 	}
 
+    @Override
 	public User getGuestUser(String userId){
 		if(userId == null || userId.isEmpty() || !userId.startsWith(GUEST_ID_PREFIX)){
 			return null;

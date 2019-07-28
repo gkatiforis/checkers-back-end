@@ -1,5 +1,6 @@
 package com.katiforis.checkers.DTO.response;
 
+import com.katiforis.checkers.DTO.GameType;
 import com.katiforis.checkers.DTO.UserDto;
 import com.katiforis.checkers.game.Board;
 import lombok.*;
@@ -14,6 +15,7 @@ import java.util.List;
 public class GameState extends GameResponse {
     private int gameStatus;
     private List<UserDto> players;
+    private GameType gameType;
     private Board board;
     private Date dateStarted;
     private Date currentDate;
