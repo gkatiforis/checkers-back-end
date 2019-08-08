@@ -276,6 +276,8 @@ public class GameHandlerServiceImpl implements GameHandlerService {
             gameStats.setWinnerColor(winner.getColor());
             gameStats.setPlayers(Arrays.asList(winner, loser));
         }
+        gameState.setGameStats(gameStats);
+        gameRepository.updateGame(gameState);
 
 //		playerDtos.sort((p1, p2)->
 //				-1 * Integer.compare(p1.getPlayerDetails().getEloExtra(), p2.getPlayerDetails().getEloExtra()));
@@ -295,12 +297,13 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         gameId = gameId.replace("\n", "").replace("\r", "");
 
-        GameState gameStateDTO = gameRepository.getGame(gameId);
-        Date now = new Date();
-        gameStateDTO.setCurrentDate(now);
-        ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStateDTO, HttpStatus.OK);
-        simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
-
+        GameState gameState = gameRepository.getGame(gameId);
+        if (gameState != null) {
+            Date now = new Date();
+            gameState.setCurrentDate(now);
+            ResponseEntity<GameResponse> response = new ResponseEntity<>(gameState, HttpStatus.OK);
+            simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
+        }
         log.debug("End GameServiceImpl.getGameState");
     }
 

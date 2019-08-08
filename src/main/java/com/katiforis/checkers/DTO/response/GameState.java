@@ -23,7 +23,9 @@ public class GameState extends GameResponse {
     private Integer gameMaxTime;
     private String resignUserId;
     private String offerDrawUserId;
+    private Date offerDrawDate = new Date();
     private boolean draw;
+    private GameStats gameStats;
 
     public GameState(String gameId) {
             super(ResponseState.GAME_STATE.getState(), gameId);
@@ -37,6 +39,9 @@ public class GameState extends GameResponse {
     }
 
     public UserDto getCurrentPlayer(){
+        if(players == null || players.isEmpty()){
+            return null;
+        }
         if(players.get(0).getIsCurrent()){
             return players.get(0);
         }else{

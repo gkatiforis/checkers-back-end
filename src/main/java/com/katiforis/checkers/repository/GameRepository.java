@@ -30,16 +30,20 @@ public class GameRepository extends CacheRepository<String, GameState> {
             Move move = playerAnswerDTO.getMove();
             Board board = gameStateDTO.getBoard();
 
-            if (!board.isValidMove(move.getFrom(), move.getTo())) {
+            UserDto currentPlayer = gameStateDTO.getPlayers().stream().filter(p -> p.getIsCurrent()).findFirst().get();
+            if (!currentPlayer.getUserId().equals(playerAnswerDTO.getUserId()) ||
+                !board.isValidMove(move.getFrom(), move.getTo())) {
+                playerAnswerDTO.getMove().setValid(false);
                 return gameStateDTO;
             }
 
+            playerAnswerDTO.getMove().setValid(true);
             boolean isCaptureMove = board.isCaptureMove(move.getFrom(), move.getTo());
             List<Cell> cells = board.movePiece(move.getFrom().getX(), move.getFrom().getY(), move.getTo().getX(), move.getTo().getY());
 
             Date now = new Date();
 
-            UserDto currentPlayer = gameStateDTO.getPlayers().stream().filter(p -> p.getIsCurrent()).findFirst().get();
+
             long remainingTime = currentPlayer.getSecondsRemaining() -
                     Utils.getDiffInSeconds(gameStateDTO.getLastMoveDate(), now);
             currentPlayer.setSecondsRemaining(remainingTime);

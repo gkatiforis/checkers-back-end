@@ -8,6 +8,7 @@ public class Move implements Serializable {
 	private Cell from;
 	private Piece piece;
 	private boolean isObligatoryMove;
+	private boolean valid;
 
 	public Move(){}
 	public Move(Cell to, Cell from, Piece piece) {
@@ -55,4 +56,12 @@ public class Move implements Serializable {
 	public void setObligatoryMove(boolean obligatoryMove) {
 		isObligatoryMove = obligatoryMove;
 	}
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
 }

@@ -89,9 +89,6 @@ public class MenuController {
 
     @MessageMapping("/keepConnection")
     public void keepConnection() {
-        log.debug("Start MenuController.keepConnection");
-
-        log.debug("End MenuController.keepConnection");
     }
 }
 

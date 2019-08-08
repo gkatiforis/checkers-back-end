@@ -17,6 +17,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.Date;
+
+import static com.katiforis.checkers.util.Constants.OFFER_DRAW_TIME_IN_SECONDS;
+import static com.katiforis.checkers.util.Utils.getDiffInSeconds;
 
 @Slf4j
 @Service
@@ -74,11 +78,16 @@ public class GameServiceImpl implements GameService {
         playerAnswerDTO.setUserId(principal.getName());
         GameState gameState = gameRepository.getGame(playerAnswerDTO.getGameId());
 
-        if(gameState.getOfferDrawUserId() != null && !gameState.getOfferDrawUserId().equals(playerAnswerDTO.getUserId())){
+        Date now = new Date();
+
+        if(gameState.getOfferDrawUserId() != null &&
+                !gameState.getOfferDrawUserId().equals(playerAnswerDTO.getUserId()) &&
+                getDiffInSeconds(gameState.getOfferDrawDate(), now) <= OFFER_DRAW_TIME_IN_SECONDS){
             gameState.setDraw(true);
             gameRepository.updateGame(gameState);
             gameHandlerService.endGame(playerAnswerDTO.getGameId());
         }else{
+            gameState.setOfferDrawDate(now);
             gameState.setOfferDrawUserId(playerAnswerDTO.getUserId());
             gameRepository.updateGame(gameState);
             OfferDraw offerDraw = new OfferDraw(playerAnswerDTO.getGameId());
