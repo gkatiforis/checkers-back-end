@@ -224,7 +224,9 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         }
 
         GameStats gameStats = new GameStats(gameId);
-
+        Date now = new Date();
+        gameStats.setGameEndDate(now);
+        gameStats.setCurrentDate(now);
         if (loser == null && winner == null) {
             gameStats.setDraw(true);
             gameStats.setPlayers(Arrays.asList(userDto, userDto2));
@@ -301,6 +303,9 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         if (gameState != null) {
             Date now = new Date();
             gameState.setCurrentDate(now);
+            if( gameState.getGameStats() != null){
+                gameState.getGameStats().setGameEndDate(now);
+            }
             ResponseEntity<GameResponse> response = new ResponseEntity<>(gameState, HttpStatus.OK);
             simpMessagingTemplate.convertAndSendToUser(principal.getName(), Constants.MAIN_TOPIC, response);
         }
