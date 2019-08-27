@@ -68,63 +68,71 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         User user = userRepository.findByUserId(userId);
 
-
-        if (userQueue.contains(user)) {
-            return;
-        }
-
-        GameState gameStateDTO = gameRepository.getGame(findGame.getGameId());
-
-        if (gameStateDTO != null && gameStateDTO.getGameStatus() == GameState.Status.IN_PROGRESS) {
-            Start startDTO = new Start(findGame.getGameId());
-            response = new ResponseEntity<>(startDTO, HttpStatus.OK);
-            simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
-            return;
-        } else if (gameStateDTO != null &&
-                gameStateDTO.getGameStatus() == GameState.Status.PLAYERS_SELECTION &&
-                findGame.isRestart()) {
-            modelMapper.getConfiguration().setAmbiguityIgnored(true);
-            UserDto gameUserDto = modelMapper.map(user, UserDto.class);
-            GameState gameState = gameRepository.addPlayer(gameStateDTO.getGameId(), gameUserDto);
-            if (gameState.getPlayers().size() == 2) {
-                restartGame(gameStateDTO.getGameId());
+        synchronized (userQueue){
+            if (userQueue.contains(user)) {
+                if(findGame.isCancelSearching()){
+                    userQueue.remove(user);
+                    return;
+                }else {
+                    return;
+                }
             }
-        } else {
 
-            checkFee(user, findGame.getGameType());
+            GameState gameStateDTO = gameRepository.getGame(findGame.getGameId());
 
-            if (!userQueue.isEmpty()) {//create new
-                User user1 = userQueue.get(0);
-                User user2 = user;
-
-                modelMapper.getConfiguration().setAmbiguityIgnored(true);
-                UserDto gameUserDto = modelMapper.map(user1, UserDto.class);
-                UserDto gameUserDto2 = modelMapper.map(user2, UserDto.class);
-                List<UserDto> playerDtos = new ArrayList<>();
-
-
-                gameUserDto.setColor(Piece.DARK);
-                gameUserDto2.setColor(Piece.LIGHT);
-                gameUserDto2.setIsCurrent(true);
-                gameUserDto.setIsCurrent(false);
-                gameUserDto.setSecondsRemaining(10 * 60l);
-                gameUserDto2.setSecondsRemaining(10 * 60l);
-                playerDtos.add(gameUserDto);
-                playerDtos.add(gameUserDto2);
-                playerDtos.sort(Comparator.comparing(UserDto::getColor));
-
-                payFee(playerDtos, findGame.getGameType());
-
-                GameState newGame = createNewGame(playerDtos, findGame.getGameType());
-                Start startDTO = new Start(String.valueOf(newGame.getGameId()));
+            if (gameStateDTO != null && gameStateDTO.getGameStatus() == GameState.Status.IN_PROGRESS) {
+                Start startDTO = new Start(findGame.getGameId());
                 response = new ResponseEntity<>(startDTO, HttpStatus.OK);
                 simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
-                simpMessagingTemplate.convertAndSendToUser(user1.getUserId(), Constants.MAIN_TOPIC, response);
-                userQueue.clear();
+                return;
+            } else if (gameStateDTO != null &&
+                    gameStateDTO.getGameStatus() == GameState.Status.PLAYERS_SELECTION &&
+                    findGame.isRestart()) {
+                modelMapper.getConfiguration().setAmbiguityIgnored(true);
+                UserDto gameUserDto = modelMapper.map(user, UserDto.class);
+                GameState gameState = gameRepository.addPlayer(gameStateDTO.getGameId(), gameUserDto);
+                if (gameState.getPlayers().size() == 2) {
+                    restartGame(gameStateDTO.getGameId());
+                }
             } else {
-                userQueue.add(user);
+
+                checkFee(user, findGame.getGameType());
+
+                if (!userQueue.isEmpty()) {//create new
+                    User user1 = userQueue.get(0);
+                    User user2 = user;
+
+                    modelMapper.getConfiguration().setAmbiguityIgnored(true);
+                    UserDto gameUserDto = modelMapper.map(user1, UserDto.class);
+                    UserDto gameUserDto2 = modelMapper.map(user2, UserDto.class);
+                    List<UserDto> playerDtos = new ArrayList<>();
+
+
+                    gameUserDto.setColor(Piece.DARK);
+                    gameUserDto2.setColor(Piece.LIGHT);
+                    gameUserDto2.setIsCurrent(true);
+                    gameUserDto.setIsCurrent(false);
+                    gameUserDto.setSecondsRemaining(10 * 60l);
+                    gameUserDto2.setSecondsRemaining(10 * 60l);
+                    playerDtos.add(gameUserDto);
+                    playerDtos.add(gameUserDto2);
+                    playerDtos.sort(Comparator.comparing(UserDto::getColor));
+
+                    payFee(playerDtos, findGame.getGameType());
+
+                    GameState newGame = createNewGame(playerDtos, findGame.getGameType());
+                    Start startDTO = new Start(String.valueOf(newGame.getGameId()));
+                    response = new ResponseEntity<>(startDTO, HttpStatus.OK);
+                    simpMessagingTemplate.convertAndSendToUser(userId, Constants.MAIN_TOPIC, response);
+                    simpMessagingTemplate.convertAndSendToUser(user1.getUserId(), Constants.MAIN_TOPIC, response);
+                    userQueue.remove(user1);
+                    userQueue.remove(user2);
+                } else {
+                    userQueue.add(user);
+                }
             }
         }
+
         log.debug("End GameHandlerServiceImpl.findGame");
     }
 

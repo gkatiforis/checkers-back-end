@@ -68,7 +68,11 @@ public class MenuController {
 	public ResponseEntity findGame(FindGame findGame) throws GameException {
 		log.debug("Start MenuController.findGame");
 
+		if(findGame.isCancelSearching()){
             gameHandlerService.findGame(findGame);
+        }else{
+            gameHandlerService.findGame(findGame);
+        }
 
         log.debug("End MenuController.findGame");
         return new ResponseEntity<>(HttpStatus.OK);

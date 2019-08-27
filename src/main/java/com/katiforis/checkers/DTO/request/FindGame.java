@@ -11,6 +11,7 @@ public class FindGame extends BaseRequest {
 	private String gameId;
 	private boolean restart;
     private GameType gameType;
+    private boolean cancelSearching;
 
 	public FindGame() {
 		super();
