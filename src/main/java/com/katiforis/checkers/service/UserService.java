@@ -9,15 +9,12 @@ import java.util.List;
 
 public interface UserService {
 
-    @Transactional
     User registerWithGoogle(String userId, GoogleIdToken token);
 
-    @Transactional
     User registerGuest(String userId);
 
     User getUser(String userId);
 
-    @Transactional
     long deleteUser(String userId);
 
     User getGuestUser(String userId);

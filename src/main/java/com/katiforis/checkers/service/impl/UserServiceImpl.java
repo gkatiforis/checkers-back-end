@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
@@ -21,12 +22,13 @@ import java.util.Random;
 @Service
 public class UserServiceImpl implements UserService {
 
-	public static final int GUEST_ID_LENGTH = 30;
-	public static final String GUEST_ID_PREFIX = "guest_";
+    public static final int GUEST_ID_LENGTH = 30;
+    public static final String GUEST_ID_PREFIX = "guest_";
 
 	@Autowired
 	UserRepository userRepository;
 
+    @Transactional
 	@Override
 	public User registerWithGoogle(String userId, GoogleIdToken idToken) {
 		log.debug("Start PlayerServiceImpl.registerWithGoogle");
@@ -54,6 +56,7 @@ public class UserServiceImpl implements UserService {
 		return userRepository.save(user);
 	}
 
+    @Transactional
 	@Override
 	public User registerGuest(String userId) {
 		log.debug("Start PlayerServiceImpl.registerGuest");
@@ -98,6 +101,7 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByUserId(userId);
 	}
 
+    @Transactional
 	@Override
     public long deleteUser(String userId){
 		return userRepository.deleteByUserId(userId);
