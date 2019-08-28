@@ -15,7 +15,7 @@ public interface GameHandlerService {
 
     GameState createNewGame(List<UserDto> playerDtos, GameType gameType);
 
-    void payFee(List<UserDto> playerDtos, GameType gameType);
+    void payFee(User user, GameType gameType);
 
     void checkFee(User user, GameType gameType) throws GameException;
 

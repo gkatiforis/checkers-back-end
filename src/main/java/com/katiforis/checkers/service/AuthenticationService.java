@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 
@@ -31,6 +32,7 @@ public class AuthenticationService {
     @Autowired
     private UserService userService;
 
+    @Transactional
     public UsernamePasswordAuthenticationToken authenticate(final String userId, final String token) throws AuthenticationException {
         User user;
         try {
@@ -46,6 +48,8 @@ public class AuthenticationService {
                 user = userService.getUser(payload.getSubject());
                 if(user == null){
                     user = userService.registerWithGoogle(userId, idToken);
+                }else{
+                   long id = userService.deleteUser(userId);
                 }
             } else {
                 throw new BadCredentialsException("Invalid login token");

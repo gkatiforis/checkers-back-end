@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
     User findByUserId(String userId);
+    long deleteByUserId(String userId);
     User save(User user);
     Page<User> findAllByOrderByPlayerDetails_EloDesc(Pageable pageable);
     @Query("select count(u) from User u where u.playerDetails.elo > ?1")

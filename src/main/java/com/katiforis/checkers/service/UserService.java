@@ -17,6 +17,9 @@ public interface UserService {
 
     User getUser(String userId);
 
+    @Transactional
+    long deleteUser(String userId);
+
     User getGuestUser(String userId);
 
     List<User> getPlayers(int page, int size);

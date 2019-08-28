@@ -35,11 +35,11 @@ public class UserServiceImpl implements UserService {
 			user = userRepository.findByUserId(userId);
 		}
 		if(user == null){
-			 user = new User();
+			user = new User();
 			PlayerDetails playerDetails = new PlayerDetails();
 			playerDetails.setUser(user);
 			playerDetails.setElo(0);
-			playerDetails.setCoins(0);
+			playerDetails.setCoins(2000);
 			playerDetails.setLevel(1);
 			playerDetails.setLevelPoints(0);
 			user.setPlayerDetails(playerDetails);
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
 		PlayerDetails playerDetails = new PlayerDetails();
 		playerDetails.setUser(user);
 		playerDetails.setElo(0);
-		playerDetails.setCoins(0);
+		playerDetails.setCoins(2000);
 		playerDetails.setLevel(1);
 		playerDetails.setLevelPoints(0);
 		user.setPlayerDetails(playerDetails);
@@ -96,6 +96,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String userId){
 		return userRepository.findByUserId(userId);
+	}
+
+	@Override
+    public long deleteUser(String userId){
+		return userRepository.deleteByUserId(userId);
 	}
 
     @Override

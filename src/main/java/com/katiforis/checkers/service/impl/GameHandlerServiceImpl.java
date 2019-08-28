@@ -68,12 +68,12 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         User user = userRepository.findByUserId(userId);
 
-        synchronized (userQueue){
+        synchronized (userQueue) {
             if (userQueue.contains(user)) {
-                if(findGame.isCancelSearching()){
+                if (findGame.isCancelSearching()) {
                     userQueue.remove(user);
                     return;
-                }else {
+                } else {
                     return;
                 }
             }
@@ -102,6 +102,25 @@ public class GameHandlerServiceImpl implements GameHandlerService {
                     User user1 = userQueue.get(0);
                     User user2 = user;
 
+                    User u1 = userRepository.findByUserId(user1.getUserId());
+                    User u2 = userRepository.findByUserId(user2.getUserId());
+
+                    if(u1 == null || u2 == null){
+                        if(u1 == null){
+                            userQueue.remove(user1);
+                            if (!userQueue.contains(user2)) {
+                                userQueue.add(user2);
+                            }
+                        }
+                        if (u2 == null){
+                            userQueue.remove(user2);
+                            if (!userQueue.contains(user1)) {
+                                userQueue.add(user1);
+                            }
+                        }
+                        return;
+                    }
+
                     modelMapper.getConfiguration().setAmbiguityIgnored(true);
                     UserDto gameUserDto = modelMapper.map(user1, UserDto.class);
                     UserDto gameUserDto2 = modelMapper.map(user2, UserDto.class);
@@ -118,7 +137,9 @@ public class GameHandlerServiceImpl implements GameHandlerService {
                     playerDtos.add(gameUserDto2);
                     playerDtos.sort(Comparator.comparing(UserDto::getColor));
 
-                    payFee(playerDtos, findGame.getGameType());
+
+                    payFee(u1, findGame.getGameType());
+                    payFee(u2, findGame.getGameType());
 
                     GameState newGame = createNewGame(playerDtos, findGame.getGameType());
                     Start startDTO = new Start(String.valueOf(newGame.getGameId()));
@@ -161,19 +182,16 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         return gameStateDTO;
     }
 
-    public void payFee(List<UserDto> playerDtos, GameType gameType) {
+    public void payFee(User user, GameType gameType) {
         if (gameType.getFee() > 0) {
-            for (UserDto u : playerDtos) {
-                User user = userRepository.findByUserId(u.getUserId());
-                user.getPlayerDetails().setCoins(user.getPlayerDetails().getCoins() - gameType.getFee());
-                userRepository.save(user);
-            }
+            user.getPlayerDetails().setCoins(user.getPlayerDetails().getCoins() - gameType.getFee());
+            userRepository.save(user);
         }
     }
 
     public void checkFee(User user, GameType gameType) throws GameException {
         if (gameType.getFee() > 0) {
-            if(user.getPlayerDetails().getCoins() < gameType.getFee()){
+            if (user.getPlayerDetails().getCoins() < gameType.getFee()) {
                 throw new GameException("Not enough fee");
             }
         }
@@ -311,7 +329,7 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         if (gameState != null) {
             Date now = new Date();
             gameState.setCurrentDate(now);
-            if( gameState.getGameStats() != null){
+            if (gameState.getGameStats() != null) {
                 gameState.getGameStats().setGameEndDate(now);
             }
             ResponseEntity<GameResponse> response = new ResponseEntity<>(gameState, HttpStatus.OK);
