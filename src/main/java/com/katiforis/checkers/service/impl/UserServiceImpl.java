@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
 			PlayerDetails playerDetails = new PlayerDetails();
 			playerDetails.setUser(user);
 			playerDetails.setElo(0);
-			playerDetails.setCoins(2000);
+			playerDetails.setCoins(50);
 			playerDetails.setLevel(1);
 			playerDetails.setLevelPoints(0);
 			user.setPlayerDetails(playerDetails);
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 		PlayerDetails playerDetails = new PlayerDetails();
 		playerDetails.setUser(user);
 		playerDetails.setElo(0);
-		playerDetails.setCoins(2000);
+		playerDetails.setCoins(50);
 		playerDetails.setLevel(1);
 		playerDetails.setLevelPoints(0);
 		user.setPlayerDetails(playerDetails);

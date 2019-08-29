@@ -96,7 +96,7 @@ public class GameHandlerServiceImpl implements GameHandlerService {
                 }
             } else {
 
-                checkFee(user, findGame.getGameType());
+                checkFee(user);
 
                 if (!userQueue.isEmpty()) {//create new
                     User user1 = userQueue.get(0);
@@ -138,8 +138,8 @@ public class GameHandlerServiceImpl implements GameHandlerService {
                     playerDtos.sort(Comparator.comparing(UserDto::getColor));
 
 
-                    payFee(u1, findGame.getGameType());
-                    payFee(u2, findGame.getGameType());
+                    payFee(u1);
+                    payFee(u2);
 
                     GameState newGame = createNewGame(playerDtos, findGame.getGameType());
                     Start startDTO = new Start(String.valueOf(newGame.getGameId()));
@@ -182,19 +182,15 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         return gameStateDTO;
     }
 
-    public void payFee(User user, GameType gameType) {
-        if (gameType.getFee() > 0) {
-            user.getPlayerDetails().setCoins(user.getPlayerDetails().getCoins() - gameType.getFee());
+    public void payFee(User user) {
+            user.getPlayerDetails().setCoins(user.getPlayerDetails().getCoins() - GameType.RANKING.getFee());
             userRepository.save(user);
-        }
     }
 
-    public void checkFee(User user, GameType gameType) throws GameException {
-        if (gameType.getFee() > 0) {
-            if (user.getPlayerDetails().getCoins() < gameType.getFee()) {
+    public void checkFee(User user) throws GameException {
+            if (user.getPlayerDetails().getCoins() < GameType.RANKING.getFee()) {
                 throw new GameException("Not enough fee");
             }
-        }
     }
 
     public void updateEndGameTime(String gameId, long timeSeconds) {
@@ -216,7 +212,6 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
         GameState gameState = gameRepository.getGame(gameId);
 
-        GameType gameType = gameState.getGameType();
         UserDto userDto = gameState.getPlayers().get(0);
         UserDto userDto2 = gameState.getPlayers().get(1);
         UserDto loser = null;
@@ -258,10 +253,17 @@ public class GameHandlerServiceImpl implements GameHandlerService {
             gameStats.setPlayers(Arrays.asList(userDto, userDto2));
         } else {
             User loserUser = userRepository.findByUserId(loser.getUserId());
+            User winnerUser = userRepository.findByUserId(winner.getUserId());
+
+            int eloExtraLoser = -calcScore(loserUser.getPlayerDetails().getElo(), winnerUser.getPlayerDetails().getElo());
+            Double expExtraLoser = eloExtraLoser/1.5;
+            int coinsExtraLoser = -1;
+
+
             PlayerDetails playerDetailsLoser = loserUser.getPlayerDetails();
-            int ratingLoser = playerDetailsLoser.getElo() + gameType.getEloExtraLose();
-            int pointsLoser = playerDetailsLoser.getLevelPoints() + gameType.getPointsExtraLose();
-            int coinsLoser = playerDetailsLoser.getCoins() + gameType.getCoinsExtraLoser();
+            int ratingLoser = playerDetailsLoser.getElo() + eloExtraLoser;
+            int pointsLoser = playerDetailsLoser.getLevelPoints() + expExtraLoser.intValue();
+            int coinsLoser = playerDetailsLoser.getCoins() + coinsExtraLoser;
             if (ratingLoser > 0) {
                 playerDetailsLoser.setElo(ratingLoser);
             } else {
@@ -276,15 +278,20 @@ public class GameHandlerServiceImpl implements GameHandlerService {
 
             userRepository.save(loserUser);
             loser.getPlayerDetails().setElo(playerDetailsLoser.getElo());
-            loser.getPlayerDetails().setEloExtra(gameType.getEloExtraLose());
+            loser.getPlayerDetails().setEloExtra(eloExtraLoser);
             loser.getPlayerDetails().setCoins(playerDetailsLoser.getCoins());
 
 
-            User winnerUser = userRepository.findByUserId(winner.getUserId());
+
+
+            int eloExtraWinner = calcScore(winnerUser.getPlayerDetails().getElo(), loserUser.getPlayerDetails().getElo());
+            Double expExtraWinner = eloExtraWinner/1.5;
+            int coinsExtraWinner = 2;
+
             PlayerDetails playerDetailsWinner = winnerUser.getPlayerDetails();
-            int ratingWinner = playerDetailsWinner.getElo() + gameType.getEloExtraWin();
-            int pointsWinner = playerDetailsWinner.getLevelPoints() + gameType.getPointsExtraWin();
-            int coinsWinner = playerDetailsWinner.getCoins() + gameType.getCoinsExtraWin();
+            int ratingWinner = playerDetailsWinner.getElo() + eloExtraWinner;
+            int pointsWinner = playerDetailsWinner.getLevelPoints() + expExtraWinner.intValue();
+            int coinsWinner = playerDetailsWinner.getCoins() + coinsExtraWinner;
 
             playerDetailsWinner.setElo(ratingWinner);
             playerDetailsWinner.setLevelPoints(pointsWinner);
@@ -297,9 +304,9 @@ public class GameHandlerServiceImpl implements GameHandlerService {
             }
             userRepository.save(winnerUser);
             winner.getPlayerDetails().setElo(playerDetailsWinner.getElo());
-            winner.getPlayerDetails().setEloExtra(gameType.getEloExtraWin());
+            winner.getPlayerDetails().setEloExtra(eloExtraWinner);
             winner.getPlayerDetails().setCoins(playerDetailsWinner.getCoins());
-            winner.getPlayerDetails().setCoinsExtra(gameType.getCoinsExtraWin());
+            winner.getPlayerDetails().setCoinsExtra(coinsExtraWinner);
 
             gameStats.setWinnerColor(winner.getColor());
             gameStats.setPlayers(Arrays.asList(winner, loser));
@@ -316,6 +323,11 @@ public class GameHandlerServiceImpl implements GameHandlerService {
         ResponseEntity<GameResponse> response = new ResponseEntity<>(gameStats, HttpStatus.OK);
         simpMessagingTemplate.convertAndSend(Constants.GAME_GROUP_TOPIC + gameId, response);
         log.debug("End GameHandlerServiceImpl.endGame");
+    }
+
+    public int calcScore(double prevScore, double opponentScore){
+        Double newScore = Math.floor(32*(1-(1/(Math.pow(10,(-(prevScore-opponentScore))/400.0)+1))));
+        return newScore.intValue();
     }
 
     @Override
